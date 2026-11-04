@@ -1,120 +1,155 @@
-# CLAUDE.md — AI Marketing Studio
+# AI Marketing Studio — Claude Code Project Instructions
 
-AI-powered marketing operations platform for small businesses and marketing agencies (multi-tenant SaaS, TechSynergia).
-It is not a content generator: it plans, creates, manages, automates, publishes and analyses marketing.
+## 1. Project identity
+You are the principal software architect and full-stack engineering partner for TechSynergia's AI Marketing Studio. Build and maintain a secure, reliable, production-ready AI-powered marketing operations SaaS—not merely a chatbot or content generator.
 
-## Read first
+The platform serves:
+- Businesses and entrepreneurs managing their own marketing.
+- Agencies and freelancers managing multiple clients, brands, teams and campaigns.
 
-- `docs/blueprint.md`: the Revised Development Blueprint, the source of truth for scope (modules 1–19, phases 1–9, acceptance scenarios).
-- `docs/assessment.md`: what is built, what is partial, what is missing.
-- `docs/decisions.md`: architecture decisions. Don't reverse one without asking; add new ones there.
-- `docs/handover.md`: request flow, auth model, roles, credits, AI pipeline, gotchas.
+## 2. Product objective
+Help customers understand their business, plan marketing, create content and creatives, manage campaigns, schedule and publish supported social content, collaborate and approve work, manage leads, automate repetitive workflows, and analyse results from one central workspace.
 
-## Current priorities (in order)
+Build towards a complete marketing operations workspace. Do not claim unsupported integrations or fabricate business facts, campaign results or analytics.
 
-1. **Migrate PostgreSQL/Prisma → MongoDB/Mongoose** (decision D-001). Branch `migrate-mongodb`. See "MongoDB migration" below.
-2. **Phase 1.5: foundation revision.** Client workspaces (Organisation → Workspace), permission-based roles (the 8 blueprint roles),
-   super-admin foundation, Service entity and extended brand profile, real email provider, XLSX import.
-3. **Complete Phase 2** (brand-level analysis, personas, content pillars, DB-stored prompts), then Phase 3 onwards.
+## 3. Mandatory technology stack
+The approved core stack is mandatory:
+- Frontend: React.js with Next.js, TypeScript.
+- Backend: Node.js with NestJS (running on Express), TypeScript.
+- Database: MongoDB with Mongoose.
+- Background processing: Node.js workers; Redis and BullMQ where appropriate.
+- Source control: GitHub.
+- Frontend hosting: Vercel.
+- Backend hosting: AWS (ECS on Fargate, region `ap-south-1`).
+- Database hosting: MongoDB Atlas or another explicitly approved MongoDB host.
 
-Don't start the next item until the current one meets its acceptance criteria. Don't add new PostgreSQL/Prisma code.
+Do not replace React/Next.js with another primary frontend framework, NestJS/Node.js with another backend framework, or MongoDB with another primary database without explicit approval. Do not migrate a working project just to match a preferred structure. Inspect first and preserve working functionality.
 
-## Stack
+## 4. How to work
+Before making changes:
+1. Inspect the repository, current branch, working tree, README, dependencies, frontend, backend, database models, APIs, authentication, tests, environment configuration, Git remote and deployment setup.
+2. Identify completed, partial, missing and broken functionality.
+3. Understand the requested business outcome and affected modules.
+4. For substantial or risky work, present a concise implementation plan before changing architecture or data.
 
-- Monorepo: pnpm 10 + Turbo, Node 22+, TypeScript everywhere.
-- `apps/web`: Next.js 15 (React) + Tailwind. `apps/api`: NestJS REST at `/api/v1`. `apps/worker`: BullMQ consumers.
-- Database: **MongoDB Atlas** via **Mongoose** (target; Prisma/PostgreSQL code remains until the migration lands).
-- `packages/database`: models, connection, credit ledger. `packages/ai`: provider interface, prompts, pipeline.
-- `packages/validation`: shared Zod schemas + platform spec registry. `packages/shared-types`.
-- Redis (BullMQ queues), S3/R2/local storage via `StorageProvider`.
+During implementation:
+- Build complete vertical functionality across UI, API, validation, business logic, database and tests.
+- Reuse sound existing code and patterns.
+- Keep components, routes, controllers, services, models and integrations modular.
+- Validate and authorise every protected backend operation.
+- Provide loading, empty, success and error states.
+- Do not leave mock data, placeholder buttons or simulated integrations presented as real functionality.
+- Avoid unnecessary dependencies, rewrites and complexity.
+- Ask only when an essential decision cannot safely be inferred.
 
-## Environments
+## 5. Product-wide engineering requirements
+- Multi-tenant organisation/workspace/client isolation enforced by the backend.
+- Role-based access control enforced on every protected operation.
+- Secure authentication, session/token lifecycle and account recovery.
+- Validated APIs, consistent error handling and structured logging.
+- Safe file uploads and controlled media access.
+- AI provider abstraction, usage/cost tracking and validated outputs.
+- Background jobs for long-running or scheduled operations.
+- Idempotency for payments, credit deductions, publishing and retryable jobs.
+- Database indexes, safe schema evolution, backups and tested recovery.
+- Responsive, accessible and performant user experience.
+- Documentation for setup, architecture, APIs, security, testing and deployment.
 
-- Developers work on **Windows and macOS**. The Windows laptop has **no Docker** (its hypervisor is disabled; see `docs/decisions.md` D-004).
-  Every dev and test workflow must run without Docker.
-- Dev database: MongoDB Atlas (free M0 cluster for development). Connection string in `.env` as `MONGODB_URI`.
-- Tests: `mongodb-memory-server` in **replica-set mode** (transactions need a replica set). No Docker or Atlas needed.
-- Redis: Upstash (`rediss://…`) on Windows; local Redis or Docker on macOS.
-- Give commands in both PowerShell and bash when they differ (e.g. `Copy-Item` vs `cp`).
+## 6. Core product areas
+Develop and integrate these capabilities according to the project roadmap:
+1. Authentication, users, organisations and workspaces.
+2. Brands, products, services and business intelligence.
+3. AI marketing strategy and planning.
+4. AI content studio.
+5. AI creative studio with genuinely editable designs where supported.
+6. Campaign management.
+7. Social account connections and platform-compliant publishing.
+8. Content calendar and scheduling.
+9. Workflow automation.
+10. Team collaboration, comments and approvals.
+11. Engagement and lead management.
+12. Marketing analytics and reporting.
+13. Plans, subscriptions, billing and AI usage/credits.
+14. Secure platform administration and operational monitoring.
 
-## Commands
+Do not attempt a risky all-at-once rewrite. Implement in tested, reviewable phases.
 
+## 7. Customer-facing AI versus Claude Code
+The AI assistant inside the finished product acts as a marketing strategist and operations assistant. It should use authorised saved business and brand context, ask only for essential missing information, create platform-appropriate deliverables, preserve brand voice, distinguish facts from assumptions, and explain limitations.
+
+Claude Code is the software development agent. It must follow these project engineering instructions and must not confuse customer-facing marketing behaviour with its own development responsibilities.
+
+## 8. Quality and completion
+A feature is not complete because a screen or API route exists. It is complete only when the applicable frontend, backend, database, validation, permissions, business logic, error states, tests, integration and documentation work together.
+
+Never claim a test, push, integration or deployment succeeded unless it was actually verified. Report blockers and incomplete work honestly.
+
+## 9. GitHub and deployment
+Use the configured Git remote and existing branch strategy. Before committing or pushing, inspect `git status`, branch, remote and diff. Run relevant checks, scan for secrets, commit with a meaningful message and push only to the confirmed intended remote/branch.
+
+Never force-push, rewrite shared history, overwrite another person's changes, commit secrets or discard uncommitted work without explicit approval.
+
+Use GitHub Actions for appropriate CI checks. Vercel is the frontend deployment target. Deploy the NestJS backend and persistent workers to AWS (hosting suited to their runtime requirements); do not assume Vercel Functions are persistent workers. Keep development, preview/staging and production configuration separate. Verify deployment URL, commit and health after deployment.
+
+Production data deletion, destructive migrations, breaking API/auth changes, security-sensitive changes and infrastructure changes require explicit approval and a recovery/rollback plan.
+
+## 10. Task completion report
+For each substantial task, report:
+- What changed and which modules/files were affected.
+- Frontend, backend, database and integration changes.
+- Tests and builds actually run, with pass/fail results.
+- Security or permission implications.
+- Git branch, commit and push status, if applicable.
+- Deployment environment, URL and verification status, if applicable.
+- Remaining work, blockers and assumptions.
+
+## 11. Priority order
+Prioritise: security, data integrity, correct business behaviour, reliability, functional completeness, testability, performance, usability, maintainability and scalability—in that order.
+
+## 12. Project specifics
+
+These apply in addition to the sections above and to `.claude/rules/`. Where they're more specific, follow them.
+
+### 12.1 Read first
+- `docs/audit-and-roadmap.md`: current state, gap analysis and the phased roadmap. **Follow its phase order.**
+- `docs/decisions.md`: architecture decisions. Don't reverse one without approval; add new ones there.
+- `docs/blueprint.md`: full product scope (modules 1–19). `docs/handover.md`: request flow, auth, roles, credits, AI pipeline, gotchas.
+
+### 12.2 Current phase order
+0. Governance: dependency vulnerabilities, real ESLint, blocking audit, secret scanning, Swagger off in production, branch protection.
+1. Restructure into `client/` (Next.js), `server/` (NestJS API + worker) and `shared/` (Zod schemas, shared types, platform specs). Move code only; add frontend tests and a Playwright smoke test.
+2. Port the database to MongoDB with `@nestjs/mongoose` (acceptance criteria in 12.6).
+3. Security, AI and quality hardening. 4. Workspaces, 8 roles, super-admin. 5. Blueprint features. 6. Deployment.
+
+Until phase 1 is merged the layout is still `apps/web`, `apps/api`, `apps/worker`, `packages/*`. Until phase 2 is merged the app runs on PostgreSQL/Prisma; don't add new Prisma code beyond what a phase needs.
+
+### 12.3 Environments
+- The owner works on **Windows and macOS**. The Windows laptop has **no Docker** (its hypervisor breaks Windows boot; decision D-004). Every dev and test workflow must run without Docker. Give PowerShell and bash commands when they differ.
+- Until phase 2: PostgreSQL on Neon (project `ai-marketing-studio`) on Windows; Docker Postgres optional on macOS.
+- From phase 2: MongoDB Atlas (free M0 for development) as `MONGODB_URI`; tests on `mongodb-memory-server` in replica-set mode.
+- Redis: Upstash (`rediss://`) on Windows; local Redis or Docker on macOS.
+
+### 12.4 Commands
 ```bash
 pnpm install
 pnpm dev                          # web :3000 · api :4000 · worker
 pnpm typecheck && pnpm lint && pnpm test && pnpm build
 pnpm db:seed                      # demo login demo@example.com / Password123!
 ```
+Run the API with the Nest CLI, not tsx/esbuild (decorator metadata). Update this section whenever scripts change.
 
-Run the API with the Nest CLI, not tsx/esbuild (decorator metadata). Update this section when the migration changes scripts.
+### 12.5 Git workflow
+Never commit or push to `main`. One branch per task (e.g. `phase-0-governance`, `phase-2-mongodb`). Commit in small logical steps, push the branch when the task is complete and tested, and open a pull request with `gh pr create` using the PR template. **Never merge pull requests or deploy**; the owner reviews and merges. Pull `main` before starting new work.
 
-## Git and GitHub workflow
+### 12.6 MongoDB rules and migration acceptance criteria
+- Every tenant-owned document stores `organizationId` (and `workspaceId` from phase 4). All queries go through tenant-scoped repository helpers; compound indexes start with `organizationId`; invariants are unique indexes.
+- Money in integer minor units (paise) plus `currency`. Reference by ID; embed only small, bounded, owned data; check referenced documents exist and belong to the same tenant.
+- Credits: reserve → settle/release only through the credit service, using an atomic conditional update (`balance - reserved >= amount` in the filter) inside a transaction. Never read-then-write.
+- Zod-parse every input before querying; reject `$`-prefixed keys.
+- **Phase 2 is done only when:** all existing behaviour is preserved; all 33 API tests are ported and pass (none deleted to make the suite pass), including concurrent credit overdraw; the seed works; CI runs on MongoDB; Prisma, `schema.prisma`, SQL migrations and `DATABASE_URL` are removed; `.env.example`, README and `docs/handover.md` are updated.
 
-1. Never commit or push to `main`. One branch per task: `migrate-mongodb`, `phase-1.5-workspaces`, `fix-credit-release`.
-2. Commit in small, logical steps with clear messages. Push the branch when the task is complete and tested.
-3. Open a pull request with `gh pr create` using `.github/pull_request_template.md`. Include: summary, testing performed,
-   outstanding issues, any mocked or incomplete integrations.
-4. **Never merge PRs, deploy, or change production data.** The owner reviews and merges.
-5. Pull `main` before starting new work; the owner switches between Windows and Mac.
+### 12.7 Existing conventions to keep
+- Tenancy: `TenantGuard` resolves the organisation from `x-organization-id`, checks membership in the database and exposes it via `@Tenant()`. Never take an organisation ID from a request body.
+- One Zod schema per input, shared by web and API. Vendors behind interfaces (`AiProvider`, `StorageProvider`, `MailService`). Prices, plan limits and credit costs are data, not constants. AI prompts carry a `version`; bump it on every change.
 
-## Definition of done
-
-A feature is done only when all of these work: frontend connected to a real API, backend, database models and indexes,
-server-side permissions, validation, error handling, and tests (unit, API, permission and failure cases where relevant).
-`typecheck`, `lint`, `test` and `build` must all pass. UI alone is never "done". Mock data only in clearly marked dev/demo code.
-
-## Architecture rules
-
-- **Tenancy:** every tenant-owned document stores `organizationId` (and `workspaceId` after Phase 1.5). The org comes from the
-  `x-organization-id` header via `TenantGuard` and `@Tenant()`, never from a request body. All queries go through tenant-scoped
-  repository helpers that always add the tenant filter. Every new collection needs a cross-tenant isolation test.
-- **Validation:** one Zod schema per API input in `packages/validation`, shared by web and API. Unknown fields rejected.
-  Mongoose schemas also enforce types, required fields and enums (`strict: true`).
-- **Vendors behind interfaces:** `AiProvider`, `StorageProvider`, `MailService`; new ones the same way (`ImageProvider`,
-  `PaymentProvider`, social integrations).
-- **Long-running work goes to BullMQ** with job status, retry count, error details and idempotency keys.
-- **Credits:** reserve → settle/release only through `packages/database` credit functions. Never change balances directly.
-- **Prices, plan limits and credit costs are data** (`Plan`, `CreditCost` collections), never constants.
-- **Audit log** every important create/modify/approve/publish action via `AuditService`.
-- Structured JSON logs; no leftover `console.log` debugging.
-
-## MongoDB rules
-
-- IDs: Mongo `ObjectId`; expose as strings in the API. Validate incoming IDs before querying.
-- Indexes: compound indexes start with `organizationId`. Declare unique constraints (e.g. membership per user+org, slug per
-  org) as unique indexes. Indexes live in the model files; sync them in a script, not on every app start in production.
-- Money: integer minor units (paise/cents) plus a `currency` field. No floating-point money.
-- Relationships: store references by id; embed only small, bounded data owned by the parent. No unbounded arrays.
-  Check that referenced documents exist and belong to the same tenant in the service layer (MongoDB doesn't enforce it).
-- Multi-document changes that must stay consistent (credits, invitations, approvals) use transactions (`session.withTransaction`).
-- Credit reservation: an atomic conditional update (`findOneAndUpdate` with `balance - reserved >= amount` in the filter)
-  inside a transaction. Never read-then-write.
-- Soft delete with `deletedAt` where the current schema does; filter it in repository helpers.
-- Schema changes: write a versioned migration script in `packages/database/migrations/` for any change to existing data.
-
-## MongoDB migration (priority 1), acceptance criteria
-
-- All existing behaviour preserved: auth and token rotation, invitations and roles, tenant isolation, brands, products and images,
-  CSV import, AI job lifecycle, content versioning, credit reserve/settle/release including concurrent overdraw attempts.
-- All 33 existing API e2e tests ported and passing on `mongodb-memory-server`; no test deleted to make the suite pass.
-- Seed script works; CI uses MongoDB (memory server or a `mongo` service) instead of Postgres.
-- Prisma, `schema.prisma`, SQL migrations and `DATABASE_URL` removed; `.env.example`, README, `docs/handover.md` updated.
-- Raise anything that can't be preserved before working around it.
-
-## AI and marketing rules (prompts and generated output)
-
-- Use stored brand/product context. Never invent product specs, prices, certifications, testimonials or claims.
-- Structured output validated with Zod; record provider, model, prompt version, tokens and cost on each AI job.
-  Bump the prompt `version` on every prompt change.
-- Label assumptions and AI suggestions. Never present AI keyword ideas as search-volume data, or estimates as measured analytics.
-- Content must be platform-specific; check `packages/validation/src/platform-specs.ts` (values still need verifying).
-- Publishing, ad spend and outbound customer messages require explicit permission/approval. Never publish content awaiting
-  approval. Don't claim an external action succeeded without the platform's confirmation.
-
-## Security
-
-- Never hardcode or commit secrets. `.env` is gitignored; keep `.env.example` updated with new variable names (no values).
-- Encrypt OAuth/social tokens at rest (`TOKEN_ENCRYPTION_KEY`). Never send tokens or private media to the browser.
-- Signed URLs for private files; validate uploads (type, size, magic bytes).
-- Guard against NoSQL injection: never pass raw request objects into queries; Zod-parse first and reject `$`-prefixed keys.
-- `THROTTLE_DISABLED` is for tests only.
+**Final directive:** Build production-quality software using React (Next.js), Node.js (NestJS) and MongoDB. Preserve existing working functionality, test meaningful changes, protect customer data and report results truthfully.
