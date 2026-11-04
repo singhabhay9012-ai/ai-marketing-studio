@@ -52,3 +52,17 @@ Newest last. Each decision stays in force until a later entry replaces it. All a
 ## D-010: Engineering standards
 
 **Decision:** Adopt the AI Marketing Studio instruction pack (`CLAUDE.md` + `.claude/rules/*`) as mandatory, with the edits in D-006, D-007 and D-009 and the project specifics in `CLAUDE.md` §12.
+
+## D-011: Repository temporarily public
+
+**Context:** The GitHub repository `singhabhay9012-ai/ai-marketing-studio` is on a free personal account. It is temporarily **public** so that branch protection on `main` is available.
+
+**Decision:** Keep it public only until the account is upgraded to **GitHub Pro**. Then switch the repository back to **private** and keep the existing `main` branch protection (pull request required, `checks` status check required and up to date, linear history, no force-pushes or deletions, conversation resolution, enforced for admins).
+
+**Consequences while public:**
+- Everything committed, including history, is world-readable. Secrets must never be committed (Gitleaks runs in CI); `.env` stays git-ignored.
+- After switching to private, confirm the branch protection rules are still in place and that the Gitleaks step still runs (it is free for personal accounts).
+
+## D-012: Zod 4
+
+**Decision:** Use Zod 4 (`zod@^4.6.6`) for all shared and server-side validation, replacing Zod 3, which has no fix for GHSA-mrhx-c7xc-m3w5. JSON Schema for Swagger and AI structured outputs comes from Zod's built-in `z.toJSONSchema`, replacing `zod-to-json-schema`.

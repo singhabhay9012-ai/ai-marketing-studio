@@ -55,7 +55,7 @@ export function refreshSession(): Promise<boolean> {
         body: '{}',
       });
       if (!res.ok) return false;
-      accessToken = (await res.json()).accessToken;
+      accessToken = ((await res.json()) as { accessToken: string }).accessToken;
       return true;
     } catch {
       return false;
@@ -64,6 +64,12 @@ export function refreshSession(): Promise<boolean> {
     }
   })();
   return refreshing;
+}
+
+/** Error body shape returned by the API (Nest defaults + ZodPipe). */
+interface ErrorBody {
+  message?: string | string[];
+  errors?: Array<{ path: string; message: string }>;
 }
 
 interface Options {
@@ -94,7 +100,7 @@ export async function api<T = unknown>(path: string, opts: Options = {}, retry =
     onAuthLost?.();
   }
   if (res.status === 204) return undefined as T;
-  const data = await res.json().catch(() => ({}));
+  const data = (await res.json().catch(() => ({}))) as ErrorBody;
   if (!res.ok) {
     const message = Array.isArray(data.message) ? data.message.join(', ') : (data.message ?? res.statusText);
     throw new ApiError(res.status, message, data.errors ?? []);

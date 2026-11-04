@@ -73,7 +73,7 @@ export class ProductsService {
     await this.brands.get(t, input.brandId); // brand must belong to this org
     const slug = await this.uniqueSlug(t.organizationId, input.name);
     const product = await this.prisma.product.create({
-      data: { ...input, attributes: input.attributes as Prisma.InputJsonValue, slug, organizationId: t.organizationId },
+      data: { ...input, attributes: input.attributes, slug, organizationId: t.organizationId },
     });
     await this.audit.log({ action: 'product.create', organizationId: t.organizationId, userId: t.userId, entityType: 'Product', entityId: product.id });
     return product;
@@ -89,7 +89,7 @@ export class ProductsService {
     }
     const product = await this.prisma.product.update({
       where: { id },
-      data: { ...input, attributes: input.attributes as Prisma.InputJsonValue | undefined },
+      data: { ...input, attributes: input.attributes },
     });
     await this.audit.log({ action: 'product.update', organizationId: t.organizationId, userId: t.userId, entityType: 'Product', entityId: id });
     return product;
@@ -180,7 +180,7 @@ export class ProductsService {
     });
 
     // Detect duplicate SKUs within the file and against existing products.
-    const skus = records.map((r) => r.sku?.trim()).filter(Boolean) as string[];
+    const skus = records.map((r) => r.sku?.trim()).filter((s): s is string => Boolean(s));
     const existingSkus = new Set(
       (await this.prisma.product.findMany({ where: { organizationId: t.organizationId, sku: { in: skus } }, select: { sku: true } })).map((p) => p.sku),
     );

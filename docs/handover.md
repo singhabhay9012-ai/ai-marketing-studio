@@ -44,7 +44,7 @@ To use OpenAI, set `AI_PROVIDER=openai` and `OPENAI_API_KEY`. Vision input needs
 1. **Sprint 3 polish:** move prompt templates fully to the `PromptTemplate` table, add per-workspace job quotas and timeouts, and add an evaluation set for the analysis prompt.
 2. **Sprint 4 — Campaigns:** CRUD endpoints for `Campaign` (the schema and strategy jobs already support it) and the `/campaigns` UI.
 3. **Sprint 5 — Creative studio:** an `ImageProvider` interface, a Fabric.js editor storing `Design.editorState`, and server-side rendering to `MediaAsset`.
-4. **Sprint 6 — Marketing kits:** an `exports` queue processor that builds ZIPs (`archiver` is already a dependency) and returns signed URLs that expire.
+4. **Sprint 6 — Marketing kits:** an `exports` queue processor that builds ZIPs (add a ZIP library such as `archiver` then; it was removed in phase 0 because it was unused and v7 pulled in vulnerable `glob`/`minimatch`, and v8 is ESM-only) and returns signed URLs that expire.
 5. **Sprint 7 — Bulk & billing:** move large imports to the `bulk-import` queue, add image URL mapping, a `PaymentProvider` interface with Razorpay checkout, verified webhooks (`WebhookEvent` table already exists) and monthly credit grants.
 6. **Hardening:** PostgreSQL RLS as defence in depth, a real email provider, upload malware scanning, Sentry/OTel, backups with a tested restore, and a load test.
 7. **Platform specs:** every `verifiedAt` in `packages/validation/src/platform-specs.ts` is `null`. Verify against current platform documentation before launch.

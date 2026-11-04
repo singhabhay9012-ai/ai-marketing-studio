@@ -1,5 +1,4 @@
-import type { ZodTypeAny } from 'zod';
-import { zodToJsonSchema } from 'zod-to-json-schema';
+import { z } from 'zod';
 import type { ChannelContent, MarketingStrategy, ProductAnalysis } from '@amp/shared-types';
 import { channelContentSchema, marketingStrategySchema, productAnalysisSchema } from '@amp/validation';
 import { AiProvider, BrandContext, ProductContext, ProviderResult, RetryableProviderError } from './provider';
@@ -40,7 +39,7 @@ export class OpenAiProvider implements AiProvider {
     return this.call(p.system, p.user(input), channelContentSchema, 'channel_content');
   }
 
-  private async call<T>(system: string, user: string, schema: ZodTypeAny, name: string, imageUrls: string[] = []): Promise<ProviderResult<T>> {
+  private async call<T>(system: string, user: string, schema: z.ZodType, name: string, imageUrls: string[] = []): Promise<ProviderResult<T>> {
     const content: unknown[] = [{ type: 'text', text: user }, ...imageUrls.slice(0, 4).map((url) => ({ type: 'image_url', image_url: { url } }))];
     const controller = new AbortController();
     const timer = setTimeout(() => controller.abort(), this.opts.timeoutMs ?? 60_000);
@@ -58,7 +57,7 @@ export class OpenAiProvider implements AiProvider {
           ],
           response_format: {
             type: 'json_schema',
-            json_schema: { name, schema: (zodToJsonSchema as (s: unknown, o: unknown) => object)(schema, { target: "openAi" }), strict: false },
+            json_schema: { name, schema: toOpenAiJsonSchema(schema), strict: false },
           },
         }),
       });
@@ -88,4 +87,10 @@ export class OpenAiProvider implements AiProvider {
       usage: { inputTokens: json.usage?.prompt_tokens, outputTokens: json.usage?.completion_tokens },
     };
   }
+}
+
+/** JSON Schema for OpenAI structured outputs (draft-07, without the `$schema` key). */
+function toOpenAiJsonSchema(schema: z.ZodType): Record<string, unknown> {
+  const { $schema: _ignored, ...json } = z.toJSONSchema(schema, { target: 'draft-7', io: 'output' }) as Record<string, unknown>;
+  return json;
 }

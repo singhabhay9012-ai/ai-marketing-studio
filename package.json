@@ -21,9 +21,15 @@
     "format": "prettier --write \"**/*.{ts,tsx,js,json,md,yml}\""
   },
   "devDependencies": {
+    "@eslint/js": "^9.39.5",
+    "@next/eslint-plugin-next": "^15.5.29",
+    "eslint": "^9.39.5",
+    "eslint-plugin-react-hooks": "^7.1.1",
+    "globals": "^17.14.0",
     "prettier": "^3.3.3",
     "turbo": "^2.3.0",
-    "typescript": "^5.6.3"
+    "typescript": "^5.6.3",
+    "typescript-eslint": "^8.72.1"
   },
   "pnpm": {
     "onlyBuiltDependencies": [
@@ -36,6 +42,12 @@
       "esbuild",
       "sharp",
       "unrs-resolver"
-    ]
+    ],
+    "overrides": {
+      "multer@<2.5.0": "^2.5.0",
+      "postcss@<8.5.23": "^8.5.32",
+      "deepmerge-ts@<8.0.0": "^8.0.2",
+      "js-yaml@>=5.0.0 <5.4.1": "^5.5.0"
+    }
   }
 }

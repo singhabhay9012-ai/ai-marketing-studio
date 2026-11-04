@@ -6,7 +6,12 @@ import cookieParser from 'cookie-parser';
 import express from 'express';
 import helmet from 'helmet';
 import { AppModule } from './app.module';
-import { env } from './config/env';
+import { env, Env } from './config/env';
+
+/** API docs (Swagger UI and the OpenAPI JSON) are served only outside production. */
+export function isSwaggerEnabled(e: Pick<Env, 'NODE_ENV'> = env()): boolean {
+  return e.NODE_ENV !== 'production';
+}
 
 /** Shared by main.ts and the e2e tests so tests exercise the real HTTP stack. */
 export async function createApp(): Promise<INestApplication> {
@@ -34,13 +39,15 @@ export async function createApp(): Promise<INestApplication> {
   app.setGlobalPrefix('api/v1');
   app.enableShutdownHooks();
 
-  const config = new DocumentBuilder()
-    .setTitle('AI Marketing Platform API')
-    .setDescription('REST API v1. Protected routes need a Bearer token; organisation-scoped routes also need x-organization-id.')
-    .setVersion('1.0.0')
-    .addBearerAuth()
-    .build();
-  SwaggerModule.setup('api/docs', app, SwaggerModule.createDocument(app, config), { jsonDocumentUrl: 'api/docs-json' });
+  if (isSwaggerEnabled(e)) {
+    const config = new DocumentBuilder()
+      .setTitle('AI Marketing Platform API')
+      .setDescription('REST API v1. Protected routes need a Bearer token; organisation-scoped routes also need x-organization-id.')
+      .setVersion('1.0.0')
+      .addBearerAuth()
+      .build();
+    SwaggerModule.setup('api/docs', app, SwaggerModule.createDocument(app, config), { jsonDocumentUrl: 'api/docs-json' });
+  }
 
   return app;
 }

@@ -42,8 +42,9 @@
                 "properties": {
                   "email": {
                     "type": "string",
+                    "maxLength": 254,
                     "format": "email",
-                    "maxLength": 254
+                    "pattern": "^(?:[A-Za-z0-9_'+\\-]+\\.)*[A-Za-z0-9_'+\\-]*[A-Za-z0-9_+-]@(?:[A-Za-z0-9][A-Za-z0-9\\-]*\\.)+[A-Za-z]{2,}$"
                   },
                   "password": {
                     "type": "string",
@@ -51,9 +52,11 @@
                     "maxLength": 128,
                     "allOf": [
                       {
+                        "type": "string",
                         "pattern": "[A-Za-z]"
                       },
                       {
+                        "type": "string",
                         "pattern": "[0-9]"
                       }
                     ]
@@ -102,8 +105,9 @@
                 "properties": {
                   "email": {
                     "type": "string",
+                    "maxLength": 254,
                     "format": "email",
-                    "maxLength": 254
+                    "pattern": "^(?:[A-Za-z0-9_'+\\-]+\\.)*[A-Za-z0-9_'+\\-]*[A-Za-z0-9_+-]@(?:[A-Za-z0-9][A-Za-z0-9\\-]*\\.)+[A-Za-z]{2,}$"
                   },
                   "password": {
                     "type": "string",
@@ -224,8 +228,9 @@
                 "properties": {
                   "email": {
                     "type": "string",
+                    "maxLength": 254,
                     "format": "email",
-                    "maxLength": 254
+                    "pattern": "^(?:[A-Za-z0-9_'+\\-]+\\.)*[A-Za-z0-9_'+\\-]*[A-Za-z0-9_+-]@(?:[A-Za-z0-9][A-Za-z0-9\\-]*\\.)+[A-Za-z]{2,}$"
                   }
                 },
                 "required": [
@@ -267,9 +272,11 @@
                     "maxLength": 128,
                     "allOf": [
                       {
+                        "type": "string",
                         "pattern": "[A-Za-z]"
                       },
                       {
+                        "type": "string",
                         "pattern": "[0-9]"
                       }
                     ]
@@ -590,8 +597,9 @@
                 "properties": {
                   "email": {
                     "type": "string",
+                    "maxLength": 254,
                     "format": "email",
-                    "maxLength": 254
+                    "pattern": "^(?:[A-Za-z0-9_'+\\-]+\\.)*[A-Za-z0-9_'+\\-]*[A-Za-z0-9_+-]@(?:[A-Za-z0-9][A-Za-z0-9\\-]*\\.)+[A-Za-z]{2,}$"
                   },
                   "role": {
                     "type": "string",
@@ -764,23 +772,23 @@
                     "maxLength": 120
                   },
                   "colors": {
+                    "default": [],
+                    "maxItems": 12,
                     "type": "array",
                     "items": {
                       "type": "string",
                       "pattern": "^#[0-9a-fA-F]{6}$"
-                    },
-                    "maxItems": 12,
-                    "default": []
+                    }
                   },
                   "fonts": {
+                    "default": [],
+                    "maxItems": 6,
                     "type": "array",
                     "items": {
                       "type": "string",
                       "minLength": 1,
                       "maxLength": 80
-                    },
-                    "maxItems": 6,
-                    "default": []
+                    }
                   },
                   "voice": {
                     "type": "string",
@@ -791,9 +799,9 @@
                     "maxLength": 1000
                   },
                   "guidelines": {
+                    "default": {},
                     "type": "object",
-                    "additionalProperties": {},
-                    "default": {}
+                    "additionalProperties": {}
                   }
                 },
                 "required": [
@@ -887,21 +895,21 @@
                     "maxLength": 120
                   },
                   "colors": {
+                    "maxItems": 12,
                     "type": "array",
                     "items": {
                       "type": "string",
                       "pattern": "^#[0-9a-fA-F]{6}$"
-                    },
-                    "maxItems": 12
+                    }
                   },
                   "fonts": {
+                    "maxItems": 6,
                     "type": "array",
                     "items": {
                       "type": "string",
                       "minLength": 1,
                       "maxLength": 80
-                    },
-                    "maxItems": 6
+                    }
                   },
                   "voice": {
                     "type": "string",
@@ -1018,7 +1026,8 @@
                 "properties": {
                   "brandId": {
                     "type": "string",
-                    "format": "uuid"
+                    "format": "uuid",
+                    "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
                   },
                   "name": {
                     "type": "string",
@@ -1044,25 +1053,29 @@
                     "multipleOf": 0.01
                   },
                   "salePrice": {
-                    "$ref": "#/properties/price"
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 1000000000,
+                    "multipleOf": 0.01
                   },
                   "currency": {
+                    "default": "INR",
                     "type": "string",
                     "minLength": 3,
-                    "maxLength": 3,
-                    "default": "INR"
+                    "maxLength": 3
                   },
                   "features": {
+                    "default": [],
+                    "maxItems": 30,
                     "type": "array",
                     "items": {
                       "type": "string",
                       "minLength": 1,
                       "maxLength": 200
-                    },
-                    "maxItems": 30,
-                    "default": []
+                    }
                   },
                   "attributes": {
+                    "default": {},
                     "type": "object",
                     "additionalProperties": {
                       "anyOf": [
@@ -1076,8 +1089,7 @@
                           "type": "boolean"
                         }
                       ]
-                    },
-                    "default": {}
+                    }
                   },
                   "audience": {
                     "type": "string",
@@ -1248,7 +1260,8 @@
                 "properties": {
                   "brandId": {
                     "type": "string",
-                    "format": "uuid"
+                    "format": "uuid",
+                    "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
                   },
                   "name": {
                     "type": "string",
@@ -1274,7 +1287,10 @@
                     "multipleOf": 0.01
                   },
                   "salePrice": {
-                    "$ref": "#/properties/price"
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 1000000000,
+                    "multipleOf": 0.01
                   },
                   "currency": {
                     "type": "string",
@@ -1282,13 +1298,13 @@
                     "maxLength": 3
                   },
                   "features": {
+                    "maxItems": 30,
                     "type": "array",
                     "items": {
                       "type": "string",
                       "minLength": 1,
                       "maxLength": 200
-                    },
-                    "maxItems": 30
+                    }
                   },
                   "attributes": {
                     "type": "object",
@@ -1420,8 +1436,8 @@
                   },
                   "fileSize": {
                     "type": "integer",
-                    "exclusiveMinimum": true,
                     "minimum": 0,
+                    "exclusiveMinimum": true,
                     "maximum": 10485760
                   }
                 },
@@ -1604,7 +1620,8 @@
                 "properties": {
                   "productId": {
                     "type": "string",
-                    "format": "uuid"
+                    "format": "uuid",
+                    "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
                   }
                 },
                 "required": [
@@ -1677,34 +1694,35 @@
                         }
                       },
                       "likelyUseCases": {
+                        "maxItems": 20,
                         "type": "array",
                         "items": {
                           "type": "string"
-                        },
-                        "maxItems": 20
+                        }
                       },
                       "differentiators": {
+                        "maxItems": 20,
                         "type": "array",
                         "items": {
                           "type": "string"
-                        },
-                        "maxItems": 20
+                        }
                       },
                       "audienceHypotheses": {
+                        "maxItems": 20,
                         "type": "array",
                         "items": {
                           "type": "string"
-                        },
-                        "maxItems": 20
+                        }
                       },
                       "missingInformation": {
+                        "maxItems": 30,
                         "type": "array",
                         "items": {
                           "type": "string"
-                        },
-                        "maxItems": 30
+                        }
                       },
                       "uncertain": {
+                        "maxItems": 30,
                         "type": "array",
                         "items": {
                           "type": "object",
@@ -1731,15 +1749,14 @@
                             "reason"
                           ],
                           "additionalProperties": false
-                        },
-                        "maxItems": 30
+                        }
                       },
                       "qualityWarnings": {
+                        "maxItems": 30,
                         "type": "array",
                         "items": {
                           "type": "string"
-                        },
-                        "maxItems": 30
+                        }
                       }
                     },
                     "required": [
@@ -1801,11 +1818,13 @@
                 "properties": {
                   "productId": {
                     "type": "string",
-                    "format": "uuid"
+                    "format": "uuid",
+                    "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
                   },
                   "campaignId": {
                     "type": "string",
-                    "format": "uuid"
+                    "format": "uuid",
+                    "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
                   },
                   "objective": {
                     "type": "string",
@@ -1859,13 +1878,17 @@
                 "properties": {
                   "productId": {
                     "type": "string",
-                    "format": "uuid"
+                    "format": "uuid",
+                    "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
                   },
                   "campaignId": {
                     "type": "string",
-                    "format": "uuid"
+                    "format": "uuid",
+                    "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
                   },
                   "platforms": {
+                    "minItems": 1,
+                    "maxItems": 9,
                     "type": "array",
                     "items": {
                       "type": "string",
@@ -1880,9 +1903,7 @@
                         "PINTEREST",
                         "YOUTUBE"
                       ]
-                    },
-                    "minItems": 1,
-                    "maxItems": 9
+                    }
                   }
                 },
                 "required": [
@@ -2083,6 +2104,8 @@
                         ]
                       },
                       "variants": {
+                        "minItems": 1,
+                        "maxItems": 10,
                         "type": "array",
                         "items": {
                           "type": "object",
@@ -2108,9 +2131,7 @@
                             "body"
                           ],
                           "additionalProperties": false
-                        },
-                        "minItems": 1,
-                        "maxItems": 10
+                        }
                       },
                       "seo": {
                         "type": "object",

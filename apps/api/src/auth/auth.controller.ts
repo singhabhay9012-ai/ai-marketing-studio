@@ -48,7 +48,7 @@ export class AuthController {
   @HttpCode(200)
   @ApiZodBody(refreshSchema)
   async refresh(@ZodBody(refreshSchema) body: z.infer<typeof refreshSchema>, @Req() req: AppRequest, @Res({ passthrough: true }) res: Response) {
-    const token = body.refreshToken ?? req.cookies?.[REFRESH_COOKIE];
+    const token = body.refreshToken ?? refreshCookie(req);
     if (!token) {
       res.status(401);
       return { statusCode: 401, message: 'Missing refresh token' };
@@ -61,7 +61,7 @@ export class AuthController {
   @HttpCode(204)
   @ApiZodBody(refreshSchema)
   async logout(@ZodBody(refreshSchema) body: z.infer<typeof refreshSchema>, @Req() req: AppRequest, @Res({ passthrough: true }) res: Response) {
-    await this.auth.logout(body.refreshToken ?? req.cookies?.[REFRESH_COOKIE]);
+    await this.auth.logout(body.refreshToken ?? refreshCookie(req));
     res.clearCookie(REFRESH_COOKIE, cookieOptions());
   }
 
@@ -124,6 +124,11 @@ function cookieOptions() {
     sameSite: 'strict' as const,
     path: '/api/v1/auth',
   };
+}
+
+function refreshCookie(req: AppRequest): string | undefined {
+  const value: unknown = (req.cookies as Record<string, unknown> | undefined)?.[REFRESH_COOKIE];
+  return typeof value === 'string' ? value : undefined;
 }
 
 function client(req: AppRequest) {

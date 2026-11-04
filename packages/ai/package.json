@@ -7,15 +7,14 @@
   "scripts": {
     "build": "tsc -p tsconfig.json",
     "typecheck": "tsc -p tsconfig.json --noEmit",
-    "lint": "tsc -p tsconfig.json --noEmit",
+    "lint": "eslint .",
     "test": "node --test dist/*.test.js"
   },
   "dependencies": {
     "@amp/database": "workspace:*",
     "@amp/shared-types": "workspace:*",
     "@amp/validation": "workspace:*",
-    "zod": "^3.23.8",
-    "zod-to-json-schema": "^3.23.5"
+    "zod": "^4.6.7"
   },
   "devDependencies": {
     "@amp/config": "workspace:*",

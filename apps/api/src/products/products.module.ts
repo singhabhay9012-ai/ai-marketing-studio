@@ -21,7 +21,7 @@ import { ApiZodBody, partial, ZodBody } from '../common/zod';
 import { BrandsModule } from '../brands/brands.module';
 import { ProductsService } from './products.service';
 
-const productPatchSchema = (partial(productSchema) as z.AnyZodObject).extend({
+const productPatchSchema = partial(productSchema).extend({
   status: z.enum(['DRAFT', 'ACTIVE', 'ARCHIVED']).optional(),
 });
 
@@ -53,7 +53,7 @@ export class ProductsController {
   @RequireRole('EDITOR')
   @ApiConsumes('text/csv')
   importCsv(@Tenant() t: TenantContext, @Query('brandId', ParseUUIDPipe) brandId: string, @Query('fileName') fileName: string | undefined, @Req() req: Request) {
-    const body = req.body;
+    const body: unknown = req.body;
     const csv = Buffer.isBuffer(body) ? body.toString('utf8') : typeof body === 'string' ? body : '';
     if (!csv.trim()) throw new BadRequestException('Send the CSV as the request body with Content-Type: text/csv');
     return this.products.importCsv(t, brandId, (fileName ?? 'import.csv').slice(0, 255), csv);
