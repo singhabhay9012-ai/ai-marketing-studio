@@ -1,0 +1,751 @@
+// AI Marketing Platform — Database v1.1
+// Tenant model: User --< Membership >-- Organization --< Brand --< Product
+// Every organisation-owned table carries organizationId directly so that tenant
+// scoping is a single indexed predicate (and PostgreSQL RLS can be layered on later).
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ───────────────────────────── Enums ─────────────────────────────
+
+enum UserStatus {
+  ACTIVE
+  PENDING
+  SUSPENDED
+}
+
+enum OrgRole {
+  OWNER
+  ADMIN
+  MANAGER
+  EDITOR
+  VIEWER
+}
+
+enum InvitationStatus {
+  PENDING
+  ACCEPTED
+  REVOKED
+  EXPIRED
+}
+
+enum ProductStatus {
+  DRAFT
+  ANALYSIS_PENDING
+  ACTIVE
+  ARCHIVED
+}
+
+enum UploadStatus {
+  PENDING
+  UPLOADED
+  REJECTED
+}
+
+enum CampaignStatus {
+  DRAFT
+  ACTIVE
+  COMPLETED
+  ARCHIVED
+}
+
+enum JobStatus {
+  QUEUED
+  PROCESSING
+  COMPLETED
+  FAILED
+  CANCELLED
+}
+
+enum AIJobType {
+  PRODUCT_ANALYSIS
+  STRATEGY
+  CONTENT
+  IMAGE_GENERATION
+}
+
+enum ContentStatus {
+  DRAFT
+  REVIEW
+  APPROVED
+  ARCHIVED
+}
+
+enum DesignStatus {
+  DRAFT
+  RENDERING
+  READY
+  FAILED
+}
+
+enum PublishingStatus {
+  DRAFT
+  SCHEDULED
+  QUEUED
+  PUBLISHING
+  PUBLISHED
+  FAILED
+  CANCELLED
+}
+
+enum Platform {
+  INSTAGRAM
+  FACEBOOK
+  WEBSITE
+  GOOGLE_BUSINESS
+  GOOGLE_ADS
+  WHATSAPP
+  LINKEDIN
+  PINTEREST
+  YOUTUBE
+}
+
+enum TransactionType {
+  CREDIT
+  DEBIT
+  REFUND
+  ADJUSTMENT
+  EXPIRY
+}
+
+enum ReservationStatus {
+  RESERVED
+  SETTLED
+  RELEASED
+}
+
+enum SubscriptionStatus {
+  TRIALING
+  ACTIVE
+  PAST_DUE
+  CANCELLED
+  EXPIRED
+}
+
+enum BulkImportStatus {
+  UPLOADED
+  VALIDATING
+  VALIDATED
+  PROCESSING
+  COMPLETED
+  FAILED
+}
+
+enum BulkRowStatus {
+  PENDING
+  VALID
+  INVALID
+  IMPORTED
+  FAILED
+}
+
+// ───────────────────────────── Identity ─────────────────────────────
+
+model User {
+  id              String     @id @default(uuid()) @db.Uuid
+  email           String     @unique
+  name            String?
+  passwordHash    String
+  status          UserStatus @default(ACTIVE)
+  emailVerifiedAt DateTime?
+  createdAt       DateTime   @default(now())
+  updatedAt       DateTime   @updatedAt
+
+  memberships          Membership[]
+  ownedOrganizations   Organization[]           @relation("OrganizationOwner")
+  sessions             Session[]
+  passwordResetTokens  PasswordResetToken[]
+  emailVerifyTokens    EmailVerificationToken[]
+  invitationsSent      Invitation[]             @relation("InvitationInviter")
+  auditLogs            AuditLog[]
+}
+
+/// One row per refresh-token family. Refresh tokens rotate; reuse of a
+/// rotated token revokes the whole family (theft detection).
+model Session {
+  id           String    @id @default(uuid()) @db.Uuid
+  userId       String    @db.Uuid
+  familyId     String    @db.Uuid
+  tokenHash    String    @unique
+  userAgent    String?
+  ipAddress    String?
+  expiresAt    DateTime
+  rotatedAt    DateTime?
+  revokedAt    DateTime?
+  createdAt    DateTime  @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([familyId])
+}
+
+model PasswordResetToken {
+  id        String    @id @default(uuid()) @db.Uuid
+  userId    String    @db.Uuid
+  tokenHash String    @unique
+  expiresAt DateTime
+  usedAt    DateTime?
+  createdAt DateTime  @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+}
+
+model EmailVerificationToken {
+  id        String    @id @default(uuid()) @db.Uuid
+  userId    String    @db.Uuid
+  tokenHash String    @unique
+  expiresAt DateTime
+  usedAt    DateTime?
+  createdAt DateTime  @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+}
+
+// ───────────────────────────── Tenancy ─────────────────────────────
+
+model Organization {
+  id        String    @id @default(uuid()) @db.Uuid
+  ownerId   String    @db.Uuid
+  name      String
+  slug      String    @unique
+  deletedAt DateTime?
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+
+  owner              User                @relation("OrganizationOwner", fields: [ownerId], references: [id])
+  memberships        Membership[]
+  invitations        Invitation[]
+  brands             Brand[]
+  products           Product[]
+  productImages      ProductImage[]
+  campaigns          Campaign[]
+  aiJobs             AIJob[]
+  contentAssets      ContentAsset[]
+  designs            Design[]
+  mediaAssets        MediaAsset[]
+  marketingKits      MarketingKit[]
+  socialAccounts     SocialAccount[]
+  publishingJobs     PublishingJob[]
+  subscriptions      Subscription[]
+  creditAccount      CreditAccount?
+  creditTransactions CreditTransaction[]
+  creditReservations CreditReservation[]
+  bulkImports        BulkImportBatch[]
+  auditLogs          AuditLog[]
+}
+
+model Membership {
+  id             String   @id @default(uuid()) @db.Uuid
+  userId         String   @db.Uuid
+  organizationId String   @db.Uuid
+  role           OrgRole
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  user         User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, organizationId])
+  @@index([organizationId])
+}
+
+model Invitation {
+  id             String           @id @default(uuid()) @db.Uuid
+  organizationId String           @db.Uuid
+  email          String
+  role           OrgRole
+  tokenHash      String           @unique
+  status         InvitationStatus @default(PENDING)
+  invitedById    String           @db.Uuid
+  expiresAt      DateTime
+  acceptedAt     DateTime?
+  createdAt      DateTime         @default(now())
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  invitedBy    User         @relation("InvitationInviter", fields: [invitedById], references: [id])
+
+  @@index([organizationId, status])
+  @@index([email])
+}
+
+// ───────────────────────────── Brand & Product ─────────────────────────────
+
+model Brand {
+  id             String    @id @default(uuid()) @db.Uuid
+  organizationId String    @db.Uuid
+  name           String
+  logoKey        String?
+  colors         Json      @default("[]")
+  fonts          Json      @default("[]")
+  voice          String?
+  audience       String?
+  guidelines     Json      @default("{}")
+  deletedAt      DateTime?
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  products     Product[]
+
+  @@index([organizationId])
+}
+
+model Product {
+  id             String        @id @default(uuid()) @db.Uuid
+  organizationId String        @db.Uuid
+  brandId        String        @db.Uuid
+  name           String
+  slug           String
+  sku            String?
+  category       String?
+  description    String?
+  price          Decimal?      @db.Decimal(12, 2)
+  salePrice      Decimal?      @db.Decimal(12, 2)
+  currency       String        @default("INR") @db.Char(3)
+  attributes     Json          @default("{}")
+  features       String[]      @default([])
+  audience       String?
+  offerDetails   String?
+  /// Latest confirmed AI analysis (user-reviewed). Raw outputs live on AIJob.
+  analysis       Json?
+  status         ProductStatus @default(DRAFT)
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
+
+  organization  Organization   @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  brand         Brand          @relation(fields: [brandId], references: [id], onDelete: Restrict)
+  images        ProductImage[]
+  campaigns     Campaign[]
+  aiJobs        AIJob[]
+  contentAssets ContentAsset[]
+  designs       Design[]
+
+  @@unique([organizationId, slug])
+  @@unique([organizationId, sku])
+  @@index([organizationId, status])
+  @@index([brandId])
+}
+
+model ProductImage {
+  id             String       @id @default(uuid()) @db.Uuid
+  organizationId String       @db.Uuid
+  productId      String       @db.Uuid
+  storageKey     String       @unique
+  mimeType       String
+  fileSize       Int
+  width          Int?
+  height         Int?
+  position       Int          @default(0)
+  status         UploadStatus @default(PENDING)
+  createdAt      DateTime     @default(now())
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  product      Product      @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@index([productId])
+}
+
+// ───────────────────────────── Campaigns & AI ─────────────────────────────
+
+model Campaign {
+  id              String         @id @default(uuid()) @db.Uuid
+  organizationId  String         @db.Uuid
+  productId       String         @db.Uuid
+  name            String
+  objective       String
+  targetAudience  String?
+  offerDetails    Json           @default("{}")
+  platforms       Platform[]
+  strategy        Json?
+  startDate       DateTime?
+  endDate         DateTime?
+  status          CampaignStatus @default(DRAFT)
+  createdAt       DateTime       @default(now())
+  updatedAt       DateTime       @updatedAt
+
+  organization  Organization   @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  product       Product        @relation(fields: [productId], references: [id], onDelete: Cascade)
+  aiJobs        AIJob[]
+  contentAssets ContentAsset[]
+  designs       Design[]
+  marketingKits MarketingKit[]
+
+  @@index([organizationId])
+  @@index([productId])
+}
+
+model PromptTemplate {
+  id        String   @id @default(uuid()) @db.Uuid
+  key       String
+  version   Int
+  channel   Platform?
+  system    String
+  template  String
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+
+  aiJobs AIJob[]
+
+  @@unique([key, version])
+}
+
+model AIJob {
+  id               String    @id @default(uuid()) @db.Uuid
+  organizationId   String    @db.Uuid
+  productId        String?   @db.Uuid
+  campaignId       String?   @db.Uuid
+  createdById      String?   @db.Uuid
+  jobType          AIJobType
+  provider         String
+  model            String
+  promptTemplateId String?   @db.Uuid
+  status           JobStatus @default(QUEUED)
+  progress         Int       @default(0)
+  attempts         Int       @default(0)
+  inputData        Json
+  outputData       Json?
+  error            String?
+  providerRequestId String?
+  creditsReserved  Int       @default(0)
+  creditsUsed      Int       @default(0)
+  startedAt        DateTime?
+  completedAt      DateTime?
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
+
+  organization   Organization    @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  product        Product?        @relation(fields: [productId], references: [id], onDelete: SetNull)
+  campaign       Campaign?       @relation(fields: [campaignId], references: [id], onDelete: SetNull)
+  promptTemplate PromptTemplate? @relation(fields: [promptTemplateId], references: [id])
+
+  @@index([organizationId, status])
+  @@index([productId])
+}
+
+// ───────────────────────────── Content & Creative ─────────────────────────────
+
+model ContentAsset {
+  id             String        @id @default(uuid()) @db.Uuid
+  organizationId String        @db.Uuid
+  productId      String        @db.Uuid
+  campaignId     String?       @db.Uuid
+  sourceJobId    String?       @db.Uuid
+  platform       Platform
+  contentType    String
+  title          String?
+  contentData    Json
+  status         ContentStatus @default(DRAFT)
+  version        Int           @default(1)
+  /// Points at the previous version so history forms a chain.
+  previousId     String?       @db.Uuid
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
+
+  organization   Organization    @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  product        Product         @relation(fields: [productId], references: [id], onDelete: Cascade)
+  campaign       Campaign?       @relation(fields: [campaignId], references: [id], onDelete: SetNull)
+  publishingJobs PublishingJob[]
+
+  @@index([organizationId, platform])
+  @@index([productId])
+}
+
+model Design {
+  id             String       @id @default(uuid()) @db.Uuid
+  organizationId String       @db.Uuid
+  productId      String       @db.Uuid
+  campaignId     String?      @db.Uuid
+  platform       Platform
+  templateId     String?
+  width          Int
+  height         Int
+  editorState    Json
+  status         DesignStatus @default(DRAFT)
+  version        Int          @default(1)
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  product      Product      @relation(fields: [productId], references: [id], onDelete: Cascade)
+  campaign     Campaign?    @relation(fields: [campaignId], references: [id], onDelete: SetNull)
+  mediaAssets  MediaAsset[]
+
+  @@index([organizationId])
+  @@index([productId])
+}
+
+model MediaAsset {
+  id             String   @id @default(uuid()) @db.Uuid
+  organizationId String   @db.Uuid
+  designId       String?  @db.Uuid
+  storageKey     String   @unique
+  format         String
+  fileSize       Int
+  width          Int?
+  height         Int?
+  createdAt      DateTime @default(now())
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  design       Design?      @relation(fields: [designId], references: [id], onDelete: SetNull)
+
+  @@index([organizationId])
+}
+
+model MarketingKit {
+  id             String        @id @default(uuid()) @db.Uuid
+  organizationId String        @db.Uuid
+  campaignId     String?       @db.Uuid
+  name           String
+  status         ContentStatus @default(DRAFT)
+  /// [{ type: 'content'|'design', id, platform }]
+  items          Json          @default("[]")
+  exportKey      String?
+  exportedAt     DateTime?
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  campaign     Campaign?    @relation(fields: [campaignId], references: [id], onDelete: SetNull)
+
+  @@index([organizationId])
+}
+
+// ───────────────────────────── Integrations & Publishing ─────────────────────────────
+
+model SocialAccount {
+  id                    String    @id @default(uuid()) @db.Uuid
+  organizationId        String    @db.Uuid
+  platform              Platform
+  externalAccountId     String
+  displayName           String?
+  /// AES-256-GCM ciphertext. Never returned to clients.
+  accessTokenEncrypted  String
+  refreshTokenEncrypted String?
+  tokenExpiresAt        DateTime?
+  permissions           String[]  @default([])
+  isActive              Boolean   @default(true)
+  createdAt             DateTime  @default(now())
+  updatedAt             DateTime  @updatedAt
+
+  organization   Organization    @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  publishingJobs PublishingJob[]
+
+  @@unique([organizationId, platform, externalAccountId])
+}
+
+model OAuthState {
+  id             String   @id @default(uuid()) @db.Uuid
+  state          String   @unique
+  organizationId String   @db.Uuid
+  userId         String   @db.Uuid
+  platform       Platform
+  codeVerifier   String?
+  expiresAt      DateTime
+  createdAt      DateTime @default(now())
+}
+
+model PublishingJob {
+  id              String           @id @default(uuid()) @db.Uuid
+  organizationId  String           @db.Uuid
+  contentAssetId  String           @db.Uuid
+  socialAccountId String           @db.Uuid
+  status          PublishingStatus @default(DRAFT)
+  scheduledAt     DateTime?
+  publishedAt     DateTime?
+  externalPostId  String?
+  error           String?
+  attempts        Int              @default(0)
+  idempotencyKey  String           @unique
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @updatedAt
+
+  organization  Organization     @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  contentAsset  ContentAsset     @relation(fields: [contentAssetId], references: [id], onDelete: Cascade)
+  socialAccount SocialAccount    @relation(fields: [socialAccountId], references: [id], onDelete: Cascade)
+  logs          PublishingLog[]
+
+  @@index([organizationId, status])
+  @@index([scheduledAt])
+}
+
+model PublishingLog {
+  id              String   @id @default(uuid()) @db.Uuid
+  publishingJobId String   @db.Uuid
+  event           String
+  responseData    Json?
+  createdAt       DateTime @default(now())
+
+  publishingJob PublishingJob @relation(fields: [publishingJobId], references: [id], onDelete: Cascade)
+
+  @@index([publishingJobId])
+}
+
+// ───────────────────────────── Billing & Credits ─────────────────────────────
+
+/// Plans and entitlements are data, never hard-coded. effectiveFrom allows
+/// price/limit changes without code deploys.
+model Plan {
+  id            String   @id @default(uuid()) @db.Uuid
+  code          String
+  name          String
+  priceMinor    Int
+  currency      String   @default("INR") @db.Char(3)
+  interval      String   @default("month")
+  monthlyCredits Int
+  entitlements  Json     @default("{}")
+  effectiveFrom DateTime @default(now())
+  isActive      Boolean  @default(true)
+  createdAt     DateTime @default(now())
+
+  @@unique([code, effectiveFrom])
+}
+
+/// Credit cost per operation, also data-driven.
+model CreditCost {
+  id            String    @id @default(uuid()) @db.Uuid
+  jobType       AIJobType
+  credits       Int
+  effectiveFrom DateTime  @default(now())
+
+  @@unique([jobType, effectiveFrom])
+}
+
+model Subscription {
+  id                String             @id @default(uuid()) @db.Uuid
+  organizationId    String             @db.Uuid
+  planCode          String
+  status            SubscriptionStatus
+  provider          String             @default("razorpay")
+  providerReference String?            @unique
+  startsAt          DateTime
+  expiresAt         DateTime?
+  createdAt         DateTime           @default(now())
+  updatedAt         DateTime           @updatedAt
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  @@index([organizationId, status])
+}
+
+/// Cached balance, row-locked during reservations. The immutable ledger
+/// (CreditTransaction) is the source of truth and can always rebuild this.
+model CreditAccount {
+  organizationId String   @id @db.Uuid
+  balance        Int      @default(0)
+  reserved       Int      @default(0)
+  updatedAt      DateTime @updatedAt
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+}
+
+model CreditTransaction {
+  id             String          @id @default(uuid()) @db.Uuid
+  organizationId String          @db.Uuid
+  type           TransactionType
+  /// Signed: positive adds credits, negative removes.
+  amount         Int
+  balanceAfter   Int
+  referenceId    String?
+  idempotencyKey String          @unique
+  description    String?
+  createdAt      DateTime        @default(now())
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  @@index([organizationId, createdAt])
+}
+
+model CreditReservation {
+  id             String            @id @default(uuid()) @db.Uuid
+  organizationId String            @db.Uuid
+  referenceId    String            @unique
+  amount         Int
+  settledAmount  Int?
+  status         ReservationStatus @default(RESERVED)
+  createdAt      DateTime          @default(now())
+  updatedAt      DateTime          @updatedAt
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  @@index([organizationId, status])
+}
+
+model WebhookEvent {
+  id          String    @id @default(uuid()) @db.Uuid
+  provider    String
+  eventId     String
+  eventType   String
+  payload     Json
+  processedAt DateTime?
+  error       String?
+  createdAt   DateTime  @default(now())
+
+  @@unique([provider, eventId])
+}
+
+// ───────────────────────────── Bulk import ─────────────────────────────
+
+model BulkImportBatch {
+  id             String           @id @default(uuid()) @db.Uuid
+  organizationId String           @db.Uuid
+  brandId        String           @db.Uuid
+  createdById    String           @db.Uuid
+  fileName       String
+  status         BulkImportStatus @default(UPLOADED)
+  totalRows      Int              @default(0)
+  validRows      Int              @default(0)
+  invalidRows    Int              @default(0)
+  importedRows   Int              @default(0)
+  createdAt      DateTime         @default(now())
+  updatedAt      DateTime         @updatedAt
+
+  organization Organization    @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  rows         BulkImportRow[]
+
+  @@index([organizationId])
+}
+
+model BulkImportRow {
+  id         String        @id @default(uuid()) @db.Uuid
+  batchId    String        @db.Uuid
+  rowNumber  Int
+  rawData    Json
+  status     BulkRowStatus @default(PENDING)
+  errors     Json          @default("[]")
+  productId  String?       @db.Uuid
+  attempts   Int           @default(0)
+
+  batch BulkImportBatch @relation(fields: [batchId], references: [id], onDelete: Cascade)
+
+  @@unique([batchId, rowNumber])
+}
+
+// ───────────────────────────── Audit ─────────────────────────────
+
+model AuditLog {
+  id             String   @id @default(uuid()) @db.Uuid
+  organizationId String?  @db.Uuid
+  userId         String?  @db.Uuid
+  action         String
+  entityType     String?
+  entityId       String?
+  metadata       Json?
+  ipAddress      String?
+  createdAt      DateTime @default(now())
+
+  organization Organization? @relation(fields: [organizationId], references: [id], onDelete: SetNull)
+  user         User?         @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@index([organizationId, createdAt])
+}

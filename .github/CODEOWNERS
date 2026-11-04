@@ -1,0 +1,7 @@
+# Replace with your GitHub team handles.
+*                         @your-org/tech-lead
+/packages/database/       @your-org/tech-lead @your-org/backend
+/apps/api/                @your-org/backend
+/apps/worker/             @your-org/backend @your-org/ai
+/apps/web/                @your-org/frontend
+/.github/                 @your-org/tech-lead

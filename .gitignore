@@ -1,0 +1,17 @@
+node_modules/
+dist/
+.next/
+out/
+coverage/
+.turbo/
+*.log
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+secrets/
+.storage/
+.DS_Store
+next-env.d.ts
+*.tsbuildinfo

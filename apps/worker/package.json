@@ -1,0 +1,27 @@
+{
+  "name": "@amp/worker",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "dev": "tsx watch --env-file-if-exists=../../.env src/main.ts",
+    "start": "node --env-file-if-exists=../../.env dist/main.js",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "lint": "tsc -p tsconfig.json --noEmit"
+  },
+  "dependencies": {
+    "@amp/ai": "workspace:*",
+    "@amp/database": "workspace:*",
+    "@amp/shared-types": "workspace:*",
+    "@aws-sdk/client-s3": "^3.700.0",
+    "@aws-sdk/s3-request-presigner": "^3.700.0",
+    "bullmq": "^5.30.0",
+    "ioredis": "^5.4.1"
+  },
+  "devDependencies": {
+    "@amp/config": "workspace:*",
+    "@types/node": "^22.9.0",
+    "tsx": "^4.19.2",
+    "typescript": "^5.6.3"
+  }
+}
