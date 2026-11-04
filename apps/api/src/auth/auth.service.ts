@@ -209,7 +209,7 @@ export class AuthService {
         expiresAt: new Date(Date.now() + env().JWT_REFRESH_TTL_DAYS * 86400 * 1000),
       },
     });
-    const decoded = this.jwt.decode(accessToken) as { exp: number; iat: number };
+    const decoded = this.jwt.decode<{ exp: number; iat: number }>(accessToken);
     return { accessToken, refreshToken, expiresIn: decoded.exp - decoded.iat };
   }
 }

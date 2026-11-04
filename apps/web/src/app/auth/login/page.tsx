@@ -20,7 +20,7 @@ export default function LoginPage() {
     setBusy(true);
     setError(null);
     try {
-      await login(String(f.get('email')), String(f.get('password')));
+      await login(text(f.get('email')), text(f.get('password')));
       // Only follow same-origin relative paths (no open redirect).
       router.replace(next && next.startsWith('/') && !next.startsWith('//') ? next : '/dashboard');
     } catch (err) {
@@ -55,4 +55,8 @@ export default function LoginPage() {
       </div>
     </form>
   );
+}
+
+function text(value: FormDataEntryValue | null): string {
+  return typeof value === 'string' ? value : '';
 }

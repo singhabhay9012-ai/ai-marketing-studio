@@ -41,7 +41,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       setMe(null);
       router.replace('/auth/login');
     });
-    (async () => {
+    void (async () => {
       try {
         if (await refreshSession()) await reload();
       } finally {

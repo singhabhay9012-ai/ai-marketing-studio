@@ -67,15 +67,15 @@ export async function processAiJob(db: PrismaClient, provider: AiProvider, aiJob
         const imageUrls = opts.imageUrls ? await opts.imageUrls(product.images.map((i) => i.storageKey)) : [];
         const r = await provider.analyzeProduct({ product: productCtx, brand: brandCtx, imageUrls });
         const analysis = productAnalysisSchema.parse(r.output);
-        outputData = analysis as unknown as Prisma.InputJsonValue;
+        outputData = analysis;
         ({ model, providerRequestId } = r);
         promptVersion = PROMPTS.productAnalysis.version;
         break;
       }
       case 'STRATEGY': {
-        const r = await provider.generateStrategy({ product: productCtx, brand: brandCtx, analysis: confirmedAnalysis, objective: String(input.objective ?? '') });
+        const r = await provider.generateStrategy({ product: productCtx, brand: brandCtx, analysis: confirmedAnalysis, objective: typeof input.objective === 'string' ? input.objective : '' });
         const strategy = marketingStrategySchema.parse(r.output);
-        outputData = strategy as unknown as Prisma.InputJsonValue;
+        outputData = strategy;
         ({ model, providerRequestId } = r);
         promptVersion = PROMPTS.strategy.version;
         if (job.campaignId) {
@@ -113,7 +113,7 @@ export async function processAiJob(db: PrismaClient, provider: AiProvider, aiJob
               platform,
               contentType: 'channel-copy',
               title: `${product.name} — ${platform}`,
-              contentData: content as unknown as Prisma.InputJsonValue,
+              contentData: content,
             },
           });
           assetIds.push(asset.id);
@@ -146,7 +146,7 @@ export async function processAiJob(db: PrismaClient, provider: AiProvider, aiJob
         providerRequestId,
         creditsUsed: job.creditsReserved,
         completedAt: new Date(),
-        inputData: { ...(input as object), promptVersion } as Prisma.InputJsonValue,
+        inputData: { ...(input as object), promptVersion },
       },
     });
     return 'completed';

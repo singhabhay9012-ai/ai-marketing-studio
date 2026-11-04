@@ -1,7 +1,6 @@
 import { BadRequestException, Controller, Get, Injectable, Module, NotFoundException, Param, ParseUUIDPipe, Patch, Query } from '@nestjs/common';
 import { ApiBearerAuth, ApiHeader, ApiTags } from '@nestjs/swagger';
 import { z } from 'zod';
-import { Prisma } from '@amp/database';
 import { PLATFORMS } from '@amp/shared-types';
 import { channelContentSchema } from '@amp/validation';
 import { PrismaService } from '../prisma/prisma.service';
@@ -57,7 +56,7 @@ export class ContentService {
           platform: current.platform,
           contentType: current.contentType,
           title: current.title,
-          contentData: input.contentData as unknown as Prisma.InputJsonValue,
+          contentData: input.contentData,
           status: input.status ?? 'DRAFT',
           version: current.version + 1,
           previousId: current.id,

@@ -8,7 +8,7 @@ import { api, errorText } from '@/lib/api';
 
 export default function VerifyEmailPage() {
   const token = useSearchParams().get('token') ?? '';
-  const [state, setState] = useState<'pending' | 'ok' | string>('pending');
+  const [state, setState] = useState<string>('pending') // 'pending' | 'ok' | error text;
 
   useEffect(() => {
     if (!token) return setState('This link is incomplete.');

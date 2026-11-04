@@ -143,7 +143,7 @@ describe('AI jobs and credit ledger', () => {
     const results = await Promise.allSettled(Array.from({ length: 10 }, (_, i) => reserveCredits(prisma, a.orgId, `race-${i}`, 3)));
     const ok = results.filter((r) => r.status === 'fulfilled').length;
     expect(ok).toBe(6); // 20 credits / 3 = 6
-    expect(results.filter((r) => r.status === 'rejected').every((r) => (r as PromiseRejectedResult).reason instanceof InsufficientCreditsError)).toBe(true);
+    expect(results.filter((r) => r.status === 'rejected').every((r) => r.reason instanceof InsufficientCreditsError)).toBe(true);
     expect(await getCreditSummary(prisma, a.orgId)).toEqual({ balance: 20, reserved: 18, available: 2 });
   });
 
