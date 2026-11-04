@@ -39,7 +39,7 @@ pnpm dev                          # web :3000 · api :4000 · worker
 ```
 
 - App: http://localhost:3000
-- API docs: http://localhost:4000/api/docs
+- API docs: http://localhost:4000/api/docs (served only when `NODE_ENV` is not `production`)
 - Health: http://localhost:4000/api/v1/health
 
 The API and worker load the root `.env` automatically (Node's `--env-file-if-exists`); in deployed environments, real environment variables are used instead.
