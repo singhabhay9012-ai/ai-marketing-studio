@@ -21,7 +21,7 @@ import { ApiZodBody, partial, ZodBody } from '../common/zod';
 import { BrandsModule } from '../brands/brands.module';
 import { ProductsService } from './products.service';
 
-const productPatchSchema = (partial(productSchema) as z.AnyZodObject).extend({
+const productPatchSchema = partial(productSchema).extend({
   status: z.enum(['DRAFT', 'ACTIVE', 'ARCHIVED']).optional(),
 });
 

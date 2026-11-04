@@ -41,7 +41,7 @@ export const brandSchema = z.object({
   fonts: z.array(z.string().trim().min(1).max(80)).max(6).default([]),
   voice: z.string().trim().max(1000).optional(),
   audience: z.string().trim().max(1000).optional(),
-  guidelines: z.record(z.unknown()).default({}),
+  guidelines: z.record(z.string(), z.unknown()).default({}),
 });
 export type BrandInput = z.infer<typeof brandSchema>;
 
@@ -57,7 +57,7 @@ export const productSchema = z
     salePrice: moneySchema.optional(),
     currency: currencySchema.default('INR'),
     features: z.array(z.string().trim().min(1).max(200)).max(30).default([]),
-    attributes: z.record(z.union([z.string(), z.number(), z.boolean()])).default({}),
+    attributes: z.record(z.string(), z.union([z.string(), z.number(), z.boolean()])).default({}),
     audience: z.string().trim().max(1000).optional(),
     offerDetails: z.string().trim().max(1000).optional(),
   })
@@ -68,12 +68,12 @@ export const productSchema = z
 export type ProductInput = z.infer<typeof productSchema>;
 
 /** Treat blank spreadsheet cells as "not provided". */
-const blank = <T extends z.ZodTypeAny>(schema: T) =>
+const blank = <T extends z.ZodType>(schema: T) =>
   z.preprocess((v) => (typeof v === 'string' && v.trim() === '' ? undefined : v), schema);
 
 /** One CSV/XLSX row in a bulk import. Strings in, coerced values out. */
 export const bulkProductRowSchema = z.object({
-  name: z.string({ required_error: 'name is required' }).trim().min(1, 'name is required').max(200),
+  name: z.string({ error: (iss) => (iss.input === undefined ? 'name is required' : undefined) }).trim().min(1, 'name is required').max(200),
   sku: blank(z.string().trim().max(64).optional()),
   category: blank(z.string().trim().max(120).optional()),
   description: blank(z.string().trim().max(5000).optional()),
@@ -100,7 +100,7 @@ export const requestUploadSchema = z.object({
 export const productAnalysisSchema = z.object({
   summary: z.string().min(1).max(2000),
   category: z.string().max(200),
-  visibleAttributes: z.record(z.string()),
+  visibleAttributes: z.record(z.string(), z.string()),
   likelyUseCases: z.array(z.string()).max(20),
   differentiators: z.array(z.string()).max(20),
   audienceHypotheses: z.array(z.string()).max(20),
