@@ -36,6 +36,12 @@
       "esbuild",
       "sharp",
       "unrs-resolver"
-    ]
+    ],
+    "overrides": {
+      "multer@<2.5.0": "^2.5.0",
+      "postcss@<8.5.23": "^8.5.32",
+      "deepmerge-ts@<8.0.0": "^8.0.2",
+      "js-yaml@>=5.0.0 <5.4.1": "^5.5.0"
+    }
   }
 }
