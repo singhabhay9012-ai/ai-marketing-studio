@@ -10,7 +10,7 @@ describe('API docs exposure', () => {
   async function boot(nodeEnv: 'test' | 'production'): Promise<INestApplication> {
     process.env.NODE_ENV = nodeEnv;
     // Production refuses the dev-only default signing secret.
-    if (nodeEnv === 'production') process.env.STORAGE_SIGNING_SECRET = 'docs-test-signing-secret-0123456789';
+    if (nodeEnv === 'production') process.env.STORAGE_SIGNING_SECRET = 'docs-test-'.padEnd(40, 'x'); // not a real secret
     resetEnvCache();
     const app = await createApp();
     await app.init();
