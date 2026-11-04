@@ -152,4 +152,34 @@ Never commit or push to `main`. One branch per task (e.g. `phase-0-governance`, 
 - Tenancy: `TenantGuard` resolves the organisation from `x-organization-id`, checks membership in the database and exposes it via `@Tenant()`. Never take an organisation ID from a request body.
 - One Zod schema per input, shared by web and API. Vendors behind interfaces (`AiProvider`, `StorageProvider`, `MailService`). Prices, plan limits and credit costs are data, not constants. AI prompts carry a `version`; bump it on every change.
 
+### 12.8 Specialist agents and end-of-task review
+The 13 agents in `.claude/agents/` are part of how this project is built. Delegate to them when a task matches:
+
+| Work | Agent |
+|---|---|
+| Requirements, user stories, acceptance criteria (before a phase or feature) | `business-analyst` |
+| Architecture, module design, technology and phase plans | `software-architect` |
+| User journeys, wireframes, screen specs | `ui-ux-designer` |
+| Next.js / React UI | `frontend-developer` |
+| NestJS APIs, business logic, auth, jobs | `backend-developer` |
+| MongoDB/Mongoose schemas, indexes, migrations | `database-engineer` |
+| AI providers, prompts, AI jobs, credits, RAG, product agents | `ai-ml-engineer` |
+| Social/payment/email/analytics APIs, OAuth, webhooks | `api-integration-specialist` |
+| Test plans, unit/API/e2e and regression tests | `qa-testing` |
+| Git, CI/CD, environments, Vercel/AWS deployment | `devops-deployment` |
+| README, setup, env vars, API docs, handover | `documentation-agent` |
+| Independent security review | `security-engineer` |
+| Independent code and performance review | `code-reviewer` |
+
+**Every agent finishes its task with the Final review in its own instructions** (full diff, task and rules check, checks run, loose ends) and includes the results in its report.
+
+**At the end of every task, before pushing the branch or opening a pull request**, the main session must:
+1. Run `qa-testing` on the full change: the project's quality gate plus tests for the changed behaviour.
+2. Run `code-reviewer` and `security-engineer` over the complete branch diff (`git diff origin/main...HEAD`), not only the last change.
+3. Fix every **Must fix** and **Critical/High** finding, then re-run the affected checks.
+4. Run `documentation-agent` if behaviour, setup, APIs or configuration changed.
+5. Put the combined results in the pull request description and the task completion report (§10): agents run, findings, fixes and anything still open.
+
+Skip step 2 only for documentation-only changes, and say so in the report. Don't run every agent on every task: the owner is on a usage-limited plan, so use the specialists the task actually needs.
+
 **Final directive:** Build production-quality software using React (Next.js), Node.js (NestJS) and MongoDB. Preserve existing working functionality, test meaningful changes, protect customer data and report results truthfully.
