@@ -7,7 +7,7 @@
     "dev": "nest start --watch --exec \"node --env-file-if-exists=../../.env\"",
     "start": "node --env-file-if-exists=../../.env dist/main.js",
     "typecheck": "tsc -p tsconfig.json --noEmit",
-    "lint": "tsc -p tsconfig.json --noEmit",
+    "lint": "eslint .",
     "test": "jest --runInBand",
     "openapi": "nest build && node dist/scripts/export-openapi.js"
   },
