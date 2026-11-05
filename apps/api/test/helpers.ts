@@ -3,11 +3,16 @@ import request from 'supertest';
 import { PrismaClient } from '@amp/database';
 import { createApp } from '../src/bootstrap';
 import { MailService } from '../src/common/core.module';
+import { assertConnectedTestDatabase } from './db-guard';
 
 export const prisma = new PrismaClient();
 
 /** Wipes every table (except migrations) and re-inserts reference data. */
 export async function resetDb() {
+  // Second check, against the database we are really connected to, right before deleting anything.
+  const [{ db }] = await prisma.$queryRaw<Array<{ db: string }>>`SELECT current_database() AS db`;
+  assertConnectedTestDatabase(db);
+
   const tables = await prisma.$queryRaw<Array<{ tablename: string }>>`
     SELECT tablename FROM pg_tables WHERE schemaname = 'public' AND tablename <> '_prisma_migrations'`;
   await prisma.$executeRawUnsafe(`TRUNCATE ${tables.map((t) => `"${t.tablename}"`).join(', ')} RESTART IDENTITY CASCADE`);

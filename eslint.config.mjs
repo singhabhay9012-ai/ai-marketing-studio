@@ -27,9 +27,9 @@ export default tseslint.config(
       sourceType: 'module',
       globals: { ...globals.node },
       parserOptions: {
-        // seed.ts is run with tsx and sits outside the database package's tsconfig.
+        // seed.ts is run with tsx and sits outside the database package's tsconfig. playwright.config.ts sits at the root, which has no tsconfig.json.
         projectService: {
-          allowDefaultProject: ['*.mjs', '*.js', 'packages/database/prisma/seed.ts'],
+          allowDefaultProject: ['*.mjs', '*.js', 'packages/database/prisma/seed.ts', 'playwright.config.ts'],
           defaultProject: 'packages/database/tsconfig.json',
         },
         tsconfigRootDir: import.meta.dirname,

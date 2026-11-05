@@ -321,7 +321,7 @@ AI-Marketing-Studio/
 
 ## 6. Phased implementation roadmap
 
-Each phase is a separate branch and pull request. **Exit criteria** must pass before the next phase starts. "All existing tests" means the 33 API tests and 6 validation tests, ported to MongoDB in Phase 2, and none deleted to make a suite pass.
+Each phase is a separate branch and pull request. **Exit criteria** must pass before the next phase starts. "All existing tests" means every test in the suite at the time (on 5 Nov 2026: 35 API end-to-end tests, 6 validation tests, plus the Phase 1a additions), ported to MongoDB in Phase 2, with none deleted to make a suite pass.
 
 ### Phase 0: Governance and repository setup (no behaviour change)
 - Install `.claude/rules/`; merge the two `CLAUDE.md` files (§4.3); apply the §4.5 edits to the pack's rules; record decisions §4.1–4.5 in `docs/decisions.md`.
@@ -340,6 +340,8 @@ Each phase is a separate branch and pull request. **Exit criteria** must pass be
 - Add Vitest + React Testing Library for key components, and a Playwright smoke test: register → login → create brand → create product.
 
 **Exit:** all existing tests pass; client builds; Playwright smoke passes against a local API.
+
+Delivered in three pull requests: **1a** test safety net (test-database guard, `packages/ai` unit tests, Vitest for the web app, Playwright smoke in CI), **1b** the move to `client/` + `server/` + `shared/`, **1c** `robots`, `noindex` and CSP. Known bug found in 1a, to fix in 1c or Phase 3: the Products and Brands pages don't show an error when loading fails (they render an empty table).
 
 ### Phase 2: Database port to MongoDB + Mongoose (in NestJS)
 - Add `@nestjs/mongoose`; design collections from the 31 Prisma models (references vs embedding, indexes starting with `organizationId`, unique indexes, integer paise for money).
