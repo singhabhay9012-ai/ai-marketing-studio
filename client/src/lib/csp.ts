@@ -41,6 +41,8 @@ export function buildCsp({ nonce, apiUrl, storageOrigin, isDev }: CspOptions): s
     'font-src': ["'self'"],
     'connect-src': ["'self'", ...remote, ...(isDev ? ['ws:'] : [])],
     'object-src': ["'none'"],
+    'frame-src': ["'none'"],
+    'worker-src': ["'self'"],
     'base-uri': ["'self'"],
     'form-action': ["'self'"],
     'frame-ancestors': ["'none'"],

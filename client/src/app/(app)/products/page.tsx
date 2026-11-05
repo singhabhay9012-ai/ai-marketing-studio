@@ -60,9 +60,10 @@ export default function ProductsPage() {
         <button className="btn-ghost">Search</button>
       </form>
 
+      {products.error && products.data && <div className="mb-4"><LoadError message={products.error} onRetry={() => void products.reload()} /></div>}
       {products.loading ? (
         <Spinner />
-      ) : products.error ? (
+      ) : products.error && !products.data ? (
         <LoadError message={products.error} onRetry={() => void products.reload()} />
       ) : products.data?.items.length === 0 ? (
         <Empty title={query ? 'No matches' : 'No products yet'}>{!query && 'Add a product or import a CSV.'}</Empty>

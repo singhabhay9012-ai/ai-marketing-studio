@@ -27,13 +27,12 @@ export function middleware(request: NextRequest) {
 
 export const config = {
   matcher: [
-    // Pages only: skip static assets, image optimisation, metadata files and prefetches.
+    // Pages only: skip static assets, image optimisation and metadata files.
     {
       source: '/((?!_next/static|_next/image|favicon.ico|robots.txt).*)',
-      missing: [
-        { type: 'header', key: 'next-router-prefetch' },
-        { type: 'header', key: 'purpose', value: 'prefetch' },
-      ],
+      // Only Next.js router (RSC) prefetches are skipped; they are not documents. Browser-level
+      // document prefetches (Purpose: prefetch) still get the CSP, because they can become navigations.
+      missing: [{ type: 'header', key: 'next-router-prefetch' }],
     },
   ],
 };

@@ -13,6 +13,8 @@ describe('Content-Security-Policy', () => {
     expect(d['script-src']).not.toContain("'unsafe-inline'");
     expect(d['script-src']).not.toContain("'unsafe-eval'");
     expect(d['object-src']).toEqual(["'none'"]);
+    expect(d['frame-src']).toEqual(["'none'"]);
+    expect(d['worker-src']).toEqual(["'self'"]);
     expect(d['frame-ancestors']).toEqual(["'none'"]);
     expect(d['base-uri']).toEqual(["'self'"]);
     expect(d['form-action']).toEqual(["'self'"]);

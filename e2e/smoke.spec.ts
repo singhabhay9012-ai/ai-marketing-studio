@@ -8,6 +8,17 @@ test('a new user can register, create a brand and a product', async ({ page }) =
   const brandName = `E2E Brand ${unique}`;
   const productName = `E2E Product ${unique}`;
 
+  // Fail the journey on any Content-Security-Policy violation (e.g. a script missing its nonce).
+  const cspViolations: string[] = [];
+  await page.exposeFunction('reportCspViolation', (v: string) => cspViolations.push(v));
+  await page.addInitScript(() => {
+    document.addEventListener('securitypolicyviolation', (e) => {
+      void (window as unknown as { reportCspViolation: (v: string) => Promise<void> }).reportCspViolation(
+        `${e.violatedDirective} blocked ${e.blockedURI || 'inline'}`,
+      );
+    });
+  });
+
   // Register (the API signs the user in; email verification does not block).
   await page.goto('/auth/register');
   await page.getByLabel('Your name').fill('E2E Tester');
@@ -44,4 +55,7 @@ test('a new user can register, create a brand and a product', async ({ page }) =
   const row = page.getByRole('row', { name: new RegExp(productName) });
   await expect(row).toBeVisible();
   await expect(row).toContainText(brandName);
+
+  // The nonce CSP must not have blocked anything during the whole journey.
+  expect(cspViolations, cspViolations.join('\n')).toEqual([]);
 });

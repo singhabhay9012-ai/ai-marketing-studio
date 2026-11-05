@@ -78,3 +78,15 @@ Newest last. Each decision stays in force until a later entry replaces it. All a
 - GitHub branch protection on `main` is the real control. Checked 5 Nov 2026: pull request and up-to-date `checks` job required, force-pushes and deletion blocked, linear history, conversation resolution, enforced for admins, 0 approvals required (so the sole owner can merge).
 - The allowed `pnpm` scripts run whatever `package.json` defines, so script changes in a pull request deserve review. Tests must use a dedicated test database (see README).
 - If "require code owner review" is ever turned on, the sole code owner can't approve their own pull requests; add a second owner first.
+
+## D-015: Nonce-based Content-Security-Policy for the web app
+
+**Context:** Phase 1c. (D-014 is reserved for the merge-rule change in PR #5.)
+
+**Decision:** `client/src/middleware.ts` sets a per-request nonce CSP built by `client/src/lib/csp.ts`: scripts only with the nonce plus `'strict-dynamic'` (no `'unsafe-inline'` or `'unsafe-eval'` in production); `connect-src` and `img-src` limited to the site, the API origin and an optional `NEXT_PUBLIC_STORAGE_ORIGIN`; `object-src`, `frame-src` and `frame-ancestors` set to `'none'`. Every route is also `noindex` because the app has no public pages yet.
+
+**Consequences:**
+- Nonces need dynamic rendering, so the root layout reads request headers and every page renders per request. Acceptable for an authenticated, client-rendered app; static assets are still cached. Future public marketing pages should get their own route group with a hash-based or static CSP so they can stay static.
+- `style-src` keeps `'unsafe-inline'` because Tailwind and React style props need it. It allows CSS injection but not script execution. Revisit with `style-src-attr` / `style-src-elem` splitting if needed.
+- `NEXT_PUBLIC_API_URL` and `NEXT_PUBLIC_STORAGE_ORIGIN` are inlined at build time, so each Vercel environment must set its own values. With `STORAGE_DRIVER=s3`, set `NEXT_PUBLIC_STORAGE_ORIGIN` to the **bucket-specific** origin (never a shared or wildcard host), or uploads and image previews will be blocked.
+- No `report-uri` yet; add one when a violation collector exists. The Playwright smoke test fails on any CSP violation.

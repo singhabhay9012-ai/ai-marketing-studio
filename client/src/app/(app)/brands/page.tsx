@@ -29,10 +29,11 @@ export default function BrandsPage() {
         subtitle="Brand memory: logo, colours, typography and voice used across every campaign."
         actions={canEdit && <button className="btn-primary" onClick={() => setEditing('new')}>New brand</button>}
       />
+      {error && data && <div className="mb-4"><LoadError message={error} onRetry={() => void reload()} /></div>}
       {editing && <BrandForm brand={editing === 'new' ? null : editing} onDone={() => { setEditing(null); void reload(); }} />}
       {loading ? (
         <Spinner />
-      ) : error ? (
+      ) : error && !data ? (
         <LoadError message={error} onRetry={() => void reload()} />
       ) : data?.length === 0 ? (
         <Empty title="No brands yet">Products belong to a brand. Create one to begin.</Empty>

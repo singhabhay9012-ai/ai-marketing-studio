@@ -52,3 +52,14 @@ describe('BrandsPage', () => {
     expect(reload).toHaveBeenCalledTimes(1);
   });
 });
+
+describe('BrandsPage after a failed reload', () => {
+  it('keeps the loaded brands visible and shows the error above them', () => {
+    result = res([{ id: 'b1', name: 'Acme', colors: [], fonts: [], voice: null, guidelines: null, _count: { products: 0 } }], {
+      error: 'Network error',
+    });
+    render(<BrandsPage />);
+    expect(screen.getByRole('alert')).toHaveTextContent(/Network error/);
+    expect(screen.getByRole('heading', { level: 2, name: 'Acme' })).toBeInTheDocument();
+  });
+});
