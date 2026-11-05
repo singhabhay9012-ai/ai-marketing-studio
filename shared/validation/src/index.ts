@@ -3,6 +3,11 @@ import { ORG_ROLES, PLATFORMS } from '@amp/shared-types';
 
 export * from './platform-specs';
 
+// In the browser, skip Zod's JIT. Its `new Function` probe is caught, but the web app's strict
+// Content-Security-Policy (no 'unsafe-eval', decision D-015) still reports it as a violation.
+// The server keeps the faster JIT path.
+if ('window' in globalThis) z.config({ jitless: true });
+
 // ── Primitives ──
 export const emailSchema = z.string().trim().toLowerCase().email().max(254);
 export const passwordSchema = z
