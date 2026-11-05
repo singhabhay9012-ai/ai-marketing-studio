@@ -353,6 +353,7 @@ Follow-ups recorded during Phase 1 (planned for 1c or Phase 3):
 - **Low (security review, PR #4):** the test-database guard checks the database name only, not the host; consider refusing remote hosts unless `CI=true` or an explicit opt-in.
 - **Low (security review, PR #4):** the Playwright failure artifact (7-day retention) contains a throwaway test user's tokens and traces; consider uploading without traces.
 - **Low (security review, PR #4):** GitHub Actions are pinned to version tags, not commit SHAs; pin third-party actions (gitleaks) to SHAs.
+- **Medium (security review, Phase 1b; existed before):** there is no `.dockerignore`, and the Dockerfile runs `COPY . .`, so a local build would bake the root `.env` into image layers. Add a `.dockerignore` (`.env`, `.env.*` except `.env.example`, `node_modules`, `.git`, `.storage`, Playwright output) before any local image build, and by Phase 6 at the latest.
 
 ### Phase 2: Database port to MongoDB + Mongoose (in NestJS)
 - Add `@nestjs/mongoose`; design collections from the 31 Prisma models (references vs embedding, indexes starting with `organizationId`, unique indexes, integer paise for money).
