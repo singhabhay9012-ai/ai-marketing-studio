@@ -187,4 +187,19 @@ The 13 agents in `.claude/agents/` are part of how this project is built. Delega
 
 Skip step 2 only for documentation-only changes, and say so in the report. Don't run every agent on every task: the owner is on a usage-limited plan, so use the specialists the task actually needs.
 
+## 13. Communication & Response Guidelines
+
+1. **Keep updates brief:** provide only essential information. Avoid lengthy explanations, repetitive descriptions and unnecessary technical details.
+2. **Progress updates:** report what is being worked on, what has been completed and whether anything is blocked. Use 1–3 short bullet points wherever possible.
+3. **Avoid unnecessary narration:** don't explain every file inspected, command executed, function modified or internal development step unless specifically requested.
+4. **Token efficiency:** minimise unnecessary messages and token consumption. Don't send repeated updates that provide no new information.
+5. **Errors and issues:** clearly state the issue, its impact, and the action taken or required, in a few sentences.
+6. **Completion reports:** briefly summarise completed work, tests performed, test results and remaining issues.
+7. **Ask only necessary questions:** don't interrupt development with questions when a safe, reasonable decision can be made independently.
+8. **Detailed explanations on request:** provide full technical explanations, implementation details, logs or documentation only when explicitly requested or necessary for a decision.
+
+**Mandatory principle:** communicate like a senior technical lead reporting to a project owner: concise, factual, actionable and token-efficient. Prioritise development work over lengthy progress narration.
+
+**Important:** being concise must never mean skipping code reviews, security checks, testing, documentation, error reporting or important warnings. Never hide failures or claim completion without evidence. The §10 task completion report still applies, in this brief form.
+
 **Final directive:** Build production-quality software using React (Next.js), Node.js (NestJS) and MongoDB. Preserve existing working functionality, test meaningful changes, protect customer data and report results truthfully.
