@@ -33,7 +33,7 @@ Findings ranked Critical / High / Medium / Low, each with location (file:line), 
 
 ## Final review (required at the end of every task)
 Before you report, review everything you did, not just the last change:
-1. **Re-read the full change set:** `git status` and `git diff origin/main...HEAD` (plus any uncommitted changes). Look at every file you touched, and at the code around it.
+1. **Re-read the full change set:** `git status` and `git diff origin/main...HEAD`, or the branch or pull request named in your brief (plus any uncommitted changes). Look at every file in it, and at the code around it.
 2. **Check it against the task:** every requirement and acceptance criterion is met, nothing unrequested was changed, and existing behaviour is preserved.
 3. **Check it against the project rules:** `CLAUDE.md`, `.claude/rules/`, the definition of done, tenancy and permission rules, and the decisions in `docs/`.
 4. **Run the checks that apply to your area** (for example typecheck, lint, tests, build, audit) and record exact results. If you can't run something, say so.

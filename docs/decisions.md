@@ -71,4 +71,10 @@ Newest last. Each decision stays in force until a later entry replaces it. All a
 
 **Context:** The Git rules (never merge, never push to `main`, never force-push, never read secrets) were written instructions only. Claude Code runs `gh` as the owner's account, so nothing technically stopped a `gh pr merge`.
 
-**Decision:** `.claude/settings.json` denies `gh pr merge`, force-pushes, pushes to `main` and reading `.env` files, and allows the read-only Git commands and the quality-gate scripts so agents aren't blocked by prompts. Branch protection on GitHub stays the main safeguard; these rules are a second layer. They match command prefixes, so they don't catch every variant of a command.
+**Decision:** `.claude/settings.json` denies `gh pr merge`, common force-push and push-to-`main` command forms, and reading `.env` files with the Read tool. It allows read-only Git and `gh` commands and the quality-gate scripts so agents aren't blocked by prompts.
+
+**Consequences:**
+- These rules guard against accidents; they are not a security boundary. They match command prefixes, so other forms get through (for example `git push origin +main`, flags after the branch name, `gh api` merge calls, or reading `.env` with `cat` or `Get-Content` through the shell). Claude still follows the written rules in `CLAUDE.md` §12.5.
+- GitHub branch protection on `main` is the real control. Checked 5 Nov 2026: pull request and up-to-date `checks` job required, force-pushes and deletion blocked, linear history, conversation resolution, enforced for admins, 0 approvals required (so the sole owner can merge).
+- The allowed `pnpm` scripts run whatever `package.json` defines, so script changes in a pull request deserve review. Tests must use a dedicated test database (see README).
+- If "require code owner review" is ever turned on, the sole code owner can't approve their own pull requests; add a second owner first.

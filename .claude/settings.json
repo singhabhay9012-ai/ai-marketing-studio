@@ -6,11 +6,13 @@
       "Bash(pnpm lint)",
       "Bash(pnpm test)",
       "Bash(pnpm build)",
-      "Bash(pnpm audit:*)",
+      "Bash(pnpm audit)",
+      "Bash(pnpm audit --prod:*)",
       "Bash(git status:*)",
       "Bash(git diff:*)",
       "Bash(git log:*)",
-      "Bash(git branch:*)",
+      "Bash(git branch --show-current)",
+      "Bash(git branch --list:*)",
       "Bash(gh pr view:*)",
       "Bash(gh pr list:*)",
       "Bash(gh pr diff:*)",
@@ -30,7 +32,10 @@
       "Read(./**/.env.local)",
       "Read(./**/.env.development)",
       "Read(./**/.env.production)",
-      "Read(./**/.env.test)"
+      "Read(./**/.env.test)",
+      "Read(./**/.env.staging)",
+      "Read(./**/.env.preview)",
+      "Read(./**/.env.*.local)"
     ]
   }
 }
