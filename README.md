@@ -46,7 +46,7 @@ Copy-Item .env.example .env
 # Edit .env: DATABASE_URL = Neon direct (non-pooled) connection string with sslmode=require
 # (Prisma migrations can fail through the pooler), REDIS_URL = Upstash rediss:// URL,
 # STORAGE_DRIVER=local, and the JWT secrets.
-Copy-Item .env packages/database/.env   # Prisma CLI reads DATABASE_URL from here
+Copy-Item .env server/database/.env   # Prisma CLI reads DATABASE_URL from here
 pnpm db:deploy                          # stop here if migrations fail
 pnpm db:seed                            # dev only, never production. Demo login: demo@example.com / Password123!
 pnpm build
@@ -66,7 +66,7 @@ createdb -h localhost -U marketing_admin marketing_platform
 pnpm install
 cp .env.example .env              # then set DATABASE_URL, REDIS_URL and the JWT secrets
 pnpm services:up                  # optional, Docker only: Postgres 16, Redis 7, MinIO
-cp .env packages/database/.env    # Prisma CLI reads DATABASE_URL from here
+cp .env server/database/.env    # Prisma CLI reads DATABASE_URL from here
 pnpm db:deploy && pnpm db:seed    # seed is dev only, never production. Demo login: demo@example.com / Password123!
 pnpm build
 pnpm dev                          # web :3000 · api :4000 · worker
@@ -100,10 +100,10 @@ pnpm test
 
 What `pnpm test` runs:
 
-- `apps/api`: 35 end-to-end tests over real HTTP and Postgres, plus 5 unit tests for the test-database guard.
-- `apps/web`: 36 Vitest + React Testing Library tests (API client, login, register, products list, `useApi`). No database needed.
-- `packages/ai`: 29 unit tests (mock provider, prompts, job pipeline credits with an in-memory fake). Fails if no tests are found.
-- `packages/validation`: 6 unit tests.
+- `server/api`: 35 end-to-end tests over real HTTP and Postgres, plus 5 unit tests for the test-database guard.
+- `client`: 36 Vitest + React Testing Library tests (API client, login, register, products list, `useApi`). No database needed.
+- `server/ai`: 29 unit tests (mock provider, prompts, job pipeline credits with an in-memory fake). Fails if no tests are found.
+- `shared/validation`: 6 unit tests.
 
 #### End-to-end smoke test (Playwright)
 
@@ -130,16 +130,17 @@ The API suite covers auth and token rotation, cross-tenant access, role hierarch
 ## Layout
 
 ```
-apps/
-  api/        NestJS REST API (/api/v1)
-  worker/     BullMQ consumers (ai-analysis, ai-content, image-generation)
-  web/        Next.js 15 app
-packages/
-  database/   Prisma schema, migrations, seed, credit ledger
-  ai/         Provider interface, mock + OpenAI providers, prompts, job pipeline
-  validation/ Zod schemas shared by web and API, platform spec registry
-  shared-types/
-  config/     Base tsconfig
+client/         Next.js 15 app (@amp/web)
+server/
+  api/          NestJS REST API, /api/v1 (@amp/api)
+  worker/       BullMQ consumers: ai-analysis, ai-content, image-generation (@amp/worker)
+  database/     Prisma schema, migrations, seed, credit ledger (@amp/database; replaced by Mongoose in Phase 2)
+  ai/           Provider interface, mock + OpenAI providers, prompts, job pipeline (@amp/ai)
+shared/
+  validation/   Zod schemas shared by client and server, platform spec registry (@amp/validation)
+  types/        Shared TypeScript types (@amp/shared-types)
+  config/       Base tsconfig (@amp/config)
+e2e/            Playwright smoke test
 infra/docker/ docker-compose (local services) and multi-target Dockerfile
 docs/         Architecture, API (openapi.json), handover notes
 ```
