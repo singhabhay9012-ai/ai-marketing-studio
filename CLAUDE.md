@@ -89,7 +89,7 @@ Use the configured Git remote and existing branch strategy. Before committing or
 
 Never force-push, rewrite shared history, overwrite another person's changes, commit secrets or discard uncommitted work without explicit approval.
 
-Use GitHub Actions for appropriate CI checks. Vercel is the frontend deployment target. Deploy the NestJS backend and persistent workers to AWS (hosting suited to their runtime requirements); do not assume Vercel Functions are persistent workers. Keep development, preview/staging and production configuration separate. Verify deployment URL, commit and health after deployment.
+Use GitHub Actions for appropriate CI checks. Vercel is the frontend deployment target. Deploy the NestJS backend and persistent workers to AWS (hosting suited to their runtime requirements); do not assume Vercel Functions are persistent workers. Keep development, preview/staging and production configuration separate. When the owner has authorised a deployment (see §12.5), verify the deployment URL, commit and health afterwards.
 
 Production data deletion, destructive migrations, breaking API/auth changes, security-sensitive changes and infrastructure changes require explicit approval and a recovery/rollback plan.
 
@@ -172,6 +172,10 @@ The 13 agents in `.claude/agents/` are part of how this project is built. Delega
 | Independent code and performance review | `code-reviewer` |
 
 **Every agent finishes its task with the Final review in its own instructions** (full diff, task and rules check, checks run, loose ends) and includes the results in its report.
+
+**Branches and context:** the main session creates the task branch (§12.5) before delegating, and gives each agent a brief with the goal, acceptance criteria, affected files or modules and the branch name. Read-only agents (reviews, audits, analysis) may run on `main`; agents never edit, commit or push on `main`.
+
+**What counts as a task:** any change to code, configuration, CI or dependencies that ends in a pull request. Read-only audits and questions are not tasks and need no end-of-task review.
 
 **At the end of every task, before pushing the branch or opening a pull request**, the main session must:
 1. Run `qa-testing` on the full change: the project's quality gate plus tests for the changed behaviour.

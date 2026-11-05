@@ -24,7 +24,7 @@ Follow secure-by-design principles and current OWASP guidance.
 ## Secrets and integrations
 - Keep secrets in environment variables or an approved secret manager.
 - Never commit `.env` files, credentials, private keys or real tokens.
-- Never expose privileged secrets in React/Vite client bundles.
+- Never expose privileged secrets in browser bundles (Next.js client components, `NEXT_PUBLIC_` variables).
 - Encrypt sensitive OAuth credentials at rest where supported, restrict access and handle revocation/rotation.
 - Use least-privilege scopes for third-party integrations.
 

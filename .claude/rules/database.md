@@ -1,6 +1,7 @@
 # Database Rules — MongoDB and Mongoose
 
 - MongoDB is the mandatory primary database; use Mongoose for modelling and database access.
+- **Transition:** until roadmap phase 2 (the MongoDB port) is merged, the app still runs on PostgreSQL with Prisma. Maintain that code as needed, but don't add new Prisma models or features beyond what a phase needs (see `CLAUDE.md` §12.2).
 - Inspect existing schemas and data before changing models or collection structure.
 - Define explicit schemas, types, validation, timestamps and ownership/tenant fields.
 - Add indexes based on actual query patterns. Use unique indexes for invariants such as unique account identifiers within the correct scope.
