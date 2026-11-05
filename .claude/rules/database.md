@@ -14,3 +14,10 @@
 - Make schema/data changes through documented, repeatable and reversible migration or transformation procedures where possible.
 - Never run destructive production changes without explicit approval, verified backup and rollback/recovery plan.
 - Document retention, archival, export and deletion behaviour. Test backup restoration rather than assuming backups are usable.
+
+## Project specifics
+- Every tenant-owned document stores `organizationId` (plus `workspaceId` from phase 4). All queries go through tenant-scoped repository helpers; compound indexes start with `organizationId`; invariants are unique indexes.
+- Money in integer minor units (paise) plus `currency`. Reference by ID; embed only small, bounded, owned data; check referenced documents exist and belong to the same tenant.
+- Credits: reserve → settle/release only through the credit service, with an atomic conditional update (`balance - reserved >= amount` in the filter) inside a transaction. Never read-then-write.
+- Zod-parse every input before querying; reject `$`-prefixed keys.
+- Development uses MongoDB Atlas (free M0) as `MONGODB_URI`; tests use `mongodb-memory-server` in replica-set mode. Phase 2 acceptance criteria are in `docs/audit-and-roadmap.md`.

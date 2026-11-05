@@ -14,3 +14,4 @@
 - Protect against prompt injection from uploads, webpages, connected platforms and user-supplied content.
 - Require explicit authorisation before publishing, messaging, spending money or performing other external side effects.
 - The in-product AI should act as a practical marketing strategist/operations assistant. Claude Code remains the software development agent; do not confuse their roles.
+- Every prompt template carries a `version`; bump it on every change.

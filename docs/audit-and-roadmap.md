@@ -364,7 +364,7 @@ Follow-ups recorded during Phase 1 (planned for 1c or Phase 3):
 - Seed script; versioned migration scripts; remove Prisma, SQL migrations and `DATABASE_URL`.
 - Create the Atlas development cluster; delete the Neon project after merge.
 
-**Exit:** all tests pass on MongoDB; concurrency tests for credits pass; no Prisma left; README and handover updated.
+**Exit (done only when):** all existing behaviour is preserved; all existing API tests (35 end-to-end tests as of 5 Nov 2026, plus any added later) are ported and pass, with none deleted to make the suite pass, including concurrent credit overdraw; the seed works; CI runs on MongoDB; Prisma, `schema.prisma`, SQL migrations and `DATABASE_URL` are removed; `.env.example`, README and `docs/handover.md` are updated.
 
 ### Phase 3: Security, AI and quality hardening
 - Request IDs and structured JSON logging (e.g. `nestjs-pino`) across API and worker; request timeouts; move CSV import into the queue.
