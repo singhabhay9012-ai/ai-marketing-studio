@@ -13,3 +13,9 @@
 - Do not block request handlers with long-running AI, media, bulk or scheduled work. Queue appropriate work and return a trackable job/status.
 - Add structured logs and correlation/request IDs. Never log passwords, access tokens, API keys, payment secrets or sensitive customer content unnecessarily.
 - Document important APIs and test authentication, permissions, validation, error paths and tenant boundaries.
+
+## Project conventions
+- Tenancy: `TenantGuard` resolves the organisation from `x-organization-id`, checks membership in the database and exposes it via `@Tenant()`. Never take an organisation ID from a request body.
+- One Zod schema per input, shared by client and server (`shared/validation`).
+- Vendors stay behind interfaces (`AiProvider`, `StorageProvider`, `MailService`). Prices, plan limits and credit costs are data, not constants.
+- Run the API with the Nest CLI, not tsx/esbuild (decorator metadata).
