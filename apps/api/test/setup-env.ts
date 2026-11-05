@@ -1,7 +1,11 @@
 // Loaded by Jest before every test file. CI overrides DATABASE_URL/REDIS_URL.
+import { assertTestDatabaseUrl } from './db-guard';
+
 process.env.NODE_ENV = 'test';
 process.env.DATABASE_URL ??= 'postgresql://marketing_admin@localhost:5432/marketing_platform_test?schema=public';
 process.env.DATABASE_URL = process.env.DATABASE_URL.replace(/\/marketing_platform(\?|$)/, '/marketing_platform_test$1');
+// The suite deletes all data: stop before anything connects unless this is a dedicated *_test database.
+assertTestDatabaseUrl(process.env.DATABASE_URL);
 process.env.JWT_ACCESS_SECRET ??= 'test-access-secret-test-access-secret-xx';
 process.env.JWT_REFRESH_SECRET ??= 'test-refresh-secret-test-refresh-secret-x';
 process.env.STORAGE_DRIVER = 'local';
