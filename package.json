@@ -12,6 +12,7 @@
     "lint": "turbo run lint",
     "typecheck": "turbo run typecheck",
     "test": "turbo run test",
+    "test:e2e": "playwright test",
     "db:generate": "pnpm --filter @amp/database generate",
     "db:migrate": "pnpm --filter @amp/database migrate:dev",
     "db:deploy": "pnpm --filter @amp/database migrate:deploy",
@@ -23,6 +24,7 @@
   "devDependencies": {
     "@eslint/js": "^9.39.5",
     "@next/eslint-plugin-next": "^15.5.29",
+    "@playwright/test": "^1.64.1",
     "eslint": "^9.39.5",
     "eslint-plugin-react-hooks": "^7.1.1",
     "globals": "^17.14.0",
