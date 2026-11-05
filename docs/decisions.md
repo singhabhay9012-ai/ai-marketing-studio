@@ -66,3 +66,9 @@ Newest last. Each decision stays in force until a later entry replaces it. All a
 ## D-012: Zod 4
 
 **Decision:** Use Zod 4 (`zod@^4.6.6`) for all shared and server-side validation, replacing Zod 3, which has no fix for GHSA-mrhx-c7xc-m3w5. JSON Schema for Swagger and AI structured outputs comes from Zod's built-in `z.toJSONSchema`, replacing `zod-to-json-schema`.
+
+## D-013: Claude Code permission guardrails
+
+**Context:** The Git rules (never merge, never push to `main`, never force-push, never read secrets) were written instructions only. Claude Code runs `gh` as the owner's account, so nothing technically stopped a `gh pr merge`.
+
+**Decision:** `.claude/settings.json` denies `gh pr merge`, force-pushes, pushes to `main` and reading `.env` files, and allows the read-only Git commands and the quality-gate scripts so agents aren't blocked by prompts. Branch protection on GitHub stays the main safeguard; these rules are a second layer. They match command prefixes, so they don't catch every variant of a command.
