@@ -345,7 +345,7 @@ Delivered in three pull requests:
 
 - **1a** test safety net (test-database guard, AI package unit tests, Vitest for the web app, Playwright smoke in CI): **✅ done** (PR #4, merged 5 Nov 2026).
 - **1b** the move to `client/` + `server/` (`api`, `worker`, `database`, `ai`) + `shared/` (`validation`, `types`, `config`), package names unchanged: **✅ done** (PR #6, merged 5 Nov 2026).
-- **1c** `robots.txt` disallowing everything, `noindex` metadata and `X-Robots-Tag` (no public pages exist yet), a per-request nonce Content-Security-Policy in `client/src/middleware.ts` (every page is now rendered per request), `Permissions-Policy`, and the Products/Brands load-error fix: in progress.
+- **1c** `robots.txt` disallowing everything, `noindex` metadata and `X-Robots-Tag` (no public pages exist yet), a per-request nonce Content-Security-Policy in `client/src/middleware.ts` (every page is now rendered per request), `Permissions-Policy`, and the Products/Brands load-error fix: **✅ done** (PR #7, merged 5 Nov 2026). **Phase 1 complete.**
 
 Follow-ups recorded during Phase 1 (planned for 1c or Phase 3):
 
