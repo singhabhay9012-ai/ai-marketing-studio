@@ -121,7 +121,7 @@ These apply in addition to the sections above and to `.claude/rules/`. Where the
 2. Port the database to MongoDB with `@nestjs/mongoose` (acceptance criteria in 12.6).
 3. Security, AI and quality hardening. 4. Workspaces, 8 roles, super-admin. 5. Blueprint features. 6. Deployment.
 
-Until phase 1 is merged the layout is still `apps/web`, `apps/api`, `apps/worker`, `packages/*`. Until phase 2 is merged the app runs on PostgreSQL/Prisma; don't add new Prisma code beyond what a phase needs.
+Layout (since phase 1b): `client/` (Next.js), `server/api`, `server/worker`, `server/database`, `server/ai`, and `shared/validation`, `shared/types`, `shared/config`. Package names (`@amp/*`) are unchanged. Until phase 2 is merged the app runs on PostgreSQL/Prisma; don't add new Prisma code beyond what a phase needs.
 
 ### 12.3 Environments
 - The owner works on **Windows and macOS**. The Windows laptop has **no Docker** (its hypervisor breaks Windows boot; decision D-004). Every dev and test workflow must run without Docker. Give PowerShell and bash commands when they differ.
@@ -134,6 +134,7 @@ Until phase 1 is merged the layout is still `apps/web`, `apps/api`, `apps/worker
 pnpm install
 pnpm dev                          # web :3000 · api :4000 · worker
 pnpm typecheck && pnpm lint && pnpm test && pnpm build
+pnpm test:e2e                     # Playwright smoke; needs DATABASE_URL naming a *_test database, after pnpm build
 pnpm db:seed                      # demo login demo@example.com / Password123!
 ```
 Run the API with the Nest CLI, not tsx/esbuild (decorator metadata). Update this section whenever scripts change.
@@ -146,7 +147,7 @@ Never commit or push to `main`. One branch per task (e.g. `phase-0-governance`, 
 - Money in integer minor units (paise) plus `currency`. Reference by ID; embed only small, bounded, owned data; check referenced documents exist and belong to the same tenant.
 - Credits: reserve → settle/release only through the credit service, using an atomic conditional update (`balance - reserved >= amount` in the filter) inside a transaction. Never read-then-write.
 - Zod-parse every input before querying; reject `$`-prefixed keys.
-- **Phase 2 is done only when:** all existing behaviour is preserved; all 33 API tests are ported and pass (none deleted to make the suite pass), including concurrent credit overdraw; the seed works; CI runs on MongoDB; Prisma, `schema.prisma`, SQL migrations and `DATABASE_URL` are removed; `.env.example`, README and `docs/handover.md` are updated.
+- **Phase 2 is done only when:** all existing behaviour is preserved; all existing API tests (35 end-to-end tests as of 5 Nov 2026, plus any added later) are ported and pass (none deleted to make the suite pass), including concurrent credit overdraw; the seed works; CI runs on MongoDB; Prisma, `schema.prisma`, SQL migrations and `DATABASE_URL` are removed; `.env.example`, README and `docs/handover.md` are updated.
 
 ### 12.7 Existing conventions to keep
 - Tenancy: `TenantGuard` resolves the organisation from `x-organization-id`, checks membership in the database and exposes it via `@Tenant()`. Never take an organisation ID from a request body.

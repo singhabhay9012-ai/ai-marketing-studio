@@ -46,7 +46,7 @@ Copy-Item .env.example .env
 # Edit .env: DATABASE_URL = Neon direct (non-pooled) connection string with sslmode=require
 # (Prisma migrations can fail through the pooler), REDIS_URL = Upstash rediss:// URL,
 # STORAGE_DRIVER=local, and the JWT secrets.
-Copy-Item .env packages/database/.env   # Prisma CLI reads DATABASE_URL from here
+Copy-Item .env server/database/.env   # Prisma CLI reads DATABASE_URL from here
 pnpm db:deploy                          # stop here if migrations fail
 pnpm db:seed                            # dev only, never production. Demo login: demo@example.com / Password123!
 pnpm build
@@ -66,7 +66,7 @@ createdb -h localhost -U marketing_admin marketing_platform
 pnpm install
 cp .env.example .env              # then set DATABASE_URL, REDIS_URL and the JWT secrets
 pnpm services:up                  # optional, Docker only: Postgres 16, Redis 7, MinIO
-cp .env packages/database/.env    # Prisma CLI reads DATABASE_URL from here
+cp .env server/database/.env    # Prisma CLI reads DATABASE_URL from here
 pnpm db:deploy && pnpm db:seed    # seed is dev only, never production. Demo login: demo@example.com / Password123!
 pnpm build
 pnpm dev                          # web :3000 · api :4000 · worker
@@ -80,7 +80,7 @@ The API and worker load the root `.env` automatically (Node's `--env-file-if-exi
 
 ### Running tests
 
-Tests use a separate database, `marketing_platform_test`. **The test suite deletes and rewrites data.** The test setup only renames a database called exactly `marketing_platform` to `marketing_platform_test`; any other database name in `DATABASE_URL` is used as it is. So the URL you test with must point to a dedicated test database, never your development data.
+Tests use a separate database, `marketing_platform_test`. **The test suite deletes and rewrites data.** The test setup renames a database called exactly `marketing_platform` to `marketing_platform_test`, and then **refuses to run unless the database name ends in `_test`** (checked again against the connected database right before tables are wiped). The error names the database only, never the connection string.
 
 On Windows, create a separate Neon branch or database named `marketing_platform_test`, then:
 
@@ -98,21 +98,49 @@ DATABASE_URL=postgresql://marketing_admin:local_dev_password@localhost:5432/mark
 pnpm test
 ```
 
-The API suite (33 end-to-end tests over real HTTP and Postgres) covers auth and token rotation, cross-tenant access, role hierarchy, invitations, signed uploads, bulk import, AI job lifecycle, and credit reserve/settle/release including retry, failure, cancellation and concurrent overdraw attempts.
+What `pnpm test` runs:
+
+- `server/api`: 35 end-to-end tests over real HTTP and Postgres, plus 5 unit tests for the test-database guard.
+- `client`: 36 Vitest + React Testing Library tests (API client, login, register, products list, `useApi`). No database needed.
+- `server/ai`: 29 unit tests (mock provider, prompts, job pipeline credits with an in-memory fake). Fails if no tests are found.
+- `shared/validation`: 6 unit tests.
+
+#### End-to-end smoke test (Playwright)
+
+Registers a user, creates a brand and a product, and checks the product is listed, against the **built** API and web app. It refuses to start unless `DATABASE_URL` is set in your shell and names a `*_test` database; it never falls back to `.env`. Redis must be reachable (`REDIS_URL`), and the web app must have been built with `NEXT_PUBLIC_API_URL=http://localhost:4000/api/v1`. Stop `pnpm dev` first: the test starts its own servers on ports 4000 and 3000 and fails rather than reuse a running one, which could be connected to your development database.
+
+```powershell
+$env:DATABASE_URL = "<Neon direct connection string for marketing_platform_test>"
+pnpm build
+pnpm exec playwright install chromium   # first time only
+pnpm test:e2e
+```
+
+```bash
+export DATABASE_URL=postgresql://marketing_admin:local_dev_password@localhost:5432/marketing_platform_test
+pnpm build
+pnpm exec playwright install chromium   # first time only
+pnpm test:e2e
+```
+
+CI runs all of the above on every pull request; the Playwright report is uploaded when it fails.
+
+The API suite covers auth and token rotation, cross-tenant access, role hierarchy, invitations, signed uploads, bulk import, AI job lifecycle, and credit reserve/settle/release including retry, failure, cancellation and concurrent overdraw attempts.
 
 ## Layout
 
 ```
-apps/
-  api/        NestJS REST API (/api/v1)
-  worker/     BullMQ consumers (ai-analysis, ai-content, image-generation)
-  web/        Next.js 15 app
-packages/
-  database/   Prisma schema, migrations, seed, credit ledger
-  ai/         Provider interface, mock + OpenAI providers, prompts, job pipeline
-  validation/ Zod schemas shared by web and API, platform spec registry
-  shared-types/
-  config/     Base tsconfig
+client/         Next.js 15 app (@amp/web)
+server/
+  api/          NestJS REST API, /api/v1 (@amp/api)
+  worker/       BullMQ consumers: ai-analysis, ai-content, image-generation (@amp/worker)
+  database/     Prisma schema, migrations, seed, credit ledger (@amp/database; replaced by Mongoose in Phase 2)
+  ai/           Provider interface, mock + OpenAI providers, prompts, job pipeline (@amp/ai)
+shared/
+  validation/   Zod schemas shared by client and server, platform spec registry (@amp/validation)
+  types/        Shared TypeScript types (@amp/shared-types)
+  config/       Base tsconfig (@amp/config)
+e2e/            Playwright smoke test
 infra/docker/ docker-compose (local services) and multi-target Dockerfile
 docs/         Architecture, API (openapi.json), handover notes
 ```
