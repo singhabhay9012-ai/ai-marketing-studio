@@ -21,7 +21,7 @@ Newest last. Each decision stays in force until a later entry replaces it. All a
 
 ## D-003: Git workflow
 
-**Decision:** Claude Code works on feature branches, commits, pushes and opens pull requests. It never merges or deploys. The owner reviews and merges into `main`.
+**Decision:** Claude Code works on feature branches, commits, pushes and opens pull requests. It never merges or deploys. The owner reviews and merges into `main`. (Merging partly replaced by D-014; it still never deploys.)
 
 ## D-004: No Docker on the Windows development laptop
 
@@ -79,9 +79,20 @@ Newest last. Each decision stays in force until a later entry replaces it. All a
 - The allowed `pnpm` scripts run whatever `package.json` defines, so script changes in a pull request deserve review. Tests must use a dedicated test database (see README).
 - If "require code owner review" is ever turned on, the sole code owner can't approve their own pull requests; add a second owner first.
 
+## D-014: Claude may merge pull requests on explicit request
+
+**Context:** Approved by the owner on 5 Nov 2026 ("Let Claude merge"), replacing the merge part of D-003.
+
+**Decision:** The main Claude Code session may merge a pull request only when the owner explicitly asks in chat to merge that specific pull request. Before merging it confirms that the PR head is the verified commit, the required `checks` job passed and the merge state is clean, then runs `gh pr merge <number> --squash`. Subagents never merge. Claude still never deploys.
+
+**Consequences:**
+- `.claude/settings.json` moves `gh pr merge` from `deny` to `ask`, so every merge also needs the owner's approval at a permission prompt.
+- Branch protection on `main` is unchanged and is still the real control: no admin override, no bypass.
+- Without an explicit request, the owner reviews and merges as before.
+
 ## D-015: Nonce-based Content-Security-Policy for the web app
 
-**Context:** Phase 1c. (D-014 is reserved for the merge-rule change in PR #5.)
+**Context:** Phase 1c.
 
 **Decision:** `client/src/middleware.ts` sets a per-request nonce CSP built by `client/src/lib/csp.ts`: scripts only with the nonce plus `'strict-dynamic'` (no `'unsafe-inline'` or `'unsafe-eval'` in production); `connect-src` and `img-src` limited to the site, the API origin and an optional `NEXT_PUBLIC_STORAGE_ORIGIN`; `object-src`, `frame-src` and `frame-ancestors` set to `'none'`. Every route is also `noindex` because the app has no public pages yet.
 

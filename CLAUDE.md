@@ -140,7 +140,7 @@ pnpm db:seed                      # demo login demo@example.com / Password123!
 Run the API with the Nest CLI, not tsx/esbuild (decorator metadata). Update this section whenever scripts change.
 
 ### 12.5 Git workflow
-Never commit or push to `main`. One branch per task (e.g. `phase-0-governance`, `phase-2-mongodb`). Commit in small logical steps, push the branch when the task is complete and tested, and open a pull request with `gh pr create` using the PR template. **Never merge pull requests or deploy**; the owner reviews and merges. Pull `main` before starting new work.
+Never commit or push to `main`. One branch per task (e.g. `phase-0-governance`, `phase-2-mongodb`). Commit in small logical steps, push the branch when the task is complete and tested, and open a pull request with `gh pr create` using the PR template. **Never deploy.** Merging (decision D-014): only the main session, never a subagent, and only when the owner explicitly asks in chat to merge that specific pull request. Before merging, confirm the PR head is the commit that was verified, the required `checks` job passed, and GitHub reports the merge state as clean. Use `gh pr merge <number> --squash`; never use admin override or bypass branch protection. Without that explicit request, the owner reviews and merges. Pull `main` before starting new work.
 
 ### 12.6 MongoDB rules and migration acceptance criteria
 - Every tenant-owned document stores `organizationId` (and `workspaceId` from phase 4). All queries go through tenant-scoped repository helpers; compound indexes start with `organizationId`; invariants are unique indexes.
