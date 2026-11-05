@@ -19,12 +19,15 @@
     "db:seed": "pnpm --filter @amp/database seed",
     "services:up": "docker compose -f infra/docker/docker-compose.yml up -d",
     "services:down": "docker compose -f infra/docker/docker-compose.yml down",
-    "format": "prettier --write \"**/*.{ts,tsx,js,json,md,yml}\""
+    "format": "prettier --write \"**/*.{ts,tsx,js,json,md,yml}\"",
+    "typecheck:e2e": "tsc -p e2e/tsconfig.json",
+    "lint:e2e": "eslint e2e playwright.config.ts"
   },
   "devDependencies": {
     "@eslint/js": "^9.39.5",
     "@next/eslint-plugin-next": "^15.5.29",
     "@playwright/test": "^1.64.1",
+    "@types/node": "^22.20.5",
     "eslint": "^9.39.5",
     "eslint-plugin-react-hooks": "^7.1.1",
     "globals": "^17.14.0",

@@ -107,7 +107,7 @@ What `pnpm test` runs:
 
 #### End-to-end smoke test (Playwright)
 
-Registers a user, creates a brand and a product, and checks the product is listed, against the **built** API and web app. It refuses to start unless `DATABASE_URL` is set in your shell and names a `*_test` database; it never falls back to `.env`. Redis must be reachable (`REDIS_URL`), and the web app must have been built with `NEXT_PUBLIC_API_URL=http://localhost:4000/api/v1`.
+Registers a user, creates a brand and a product, and checks the product is listed, against the **built** API and web app. It refuses to start unless `DATABASE_URL` is set in your shell and names a `*_test` database; it never falls back to `.env`. Redis must be reachable (`REDIS_URL`), and the web app must have been built with `NEXT_PUBLIC_API_URL=http://localhost:4000/api/v1`. Stop `pnpm dev` first: the test starts its own servers on ports 4000 and 3000 and fails rather than reuse a running one, which could be connected to your development database.
 
 ```powershell
 $env:DATABASE_URL = "<Neon direct connection string for marketing_platform_test>"

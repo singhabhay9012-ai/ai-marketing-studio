@@ -51,15 +51,17 @@ export default defineConfig({
   webServer: [
     {
       command: 'pnpm --filter @amp/api start',
+      // Readiness endpoint (checks database and queue): Playwright waits while it returns 503.
       url: `${apiUrl}/api/v1/health`,
-      reuseExistingServer: !isCI,
+      // Never attach to an already-running server: it could be a dev API connected to the dev database,
+      // which would skip the DATABASE_URL guard above. If the port is busy, the run fails instead.
+      reuseExistingServer: false,
       timeout: 120_000,
       env: {
         // Explicit, validated test database (see the guard above).
         DATABASE_URL: databaseUrl,
-        // Not NODE_ENV=test: that would change runtime behaviour. THROTTLE_DISABLED only
-        // takes effect under NODE_ENV=test, so it is a no-op here; one registration per run stays under the limits.
-        THROTTLE_DISABLED: 'true',
+        // Not NODE_ENV=test: that would change runtime behaviour. Throttling stays on; one
+        // registration per run (two with a retry) is well under the auth limit.
         AI_PROVIDER: 'mock',
         QUEUE_ENABLED: 'false',
         STORAGE_DRIVER: 'local',
@@ -71,7 +73,7 @@ export default defineConfig({
     {
       command: 'pnpm --filter @amp/web start',
       url: webUrl,
-      reuseExistingServer: !isCI,
+      reuseExistingServer: false,
       timeout: 120_000,
     },
   ],
