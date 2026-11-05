@@ -344,12 +344,12 @@ Each phase is a separate branch and pull request. **Exit criteria** must pass be
 Delivered in three pull requests:
 
 - **1a** test safety net (test-database guard, AI package unit tests, Vitest for the web app, Playwright smoke in CI): **✅ done** (PR #4, merged 5 Nov 2026).
-- **1b** the move to `client/` + `server/` (`api`, `worker`, `database`, `ai`) + `shared/` (`validation`, `types`, `config`), package names unchanged: in progress.
-- **1c** `robots`, `noindex` and CSP.
+- **1b** the move to `client/` + `server/` (`api`, `worker`, `database`, `ai`) + `shared/` (`validation`, `types`, `config`), package names unchanged: **✅ done** (PR #6, merged 5 Nov 2026).
+- **1c** `robots.txt` disallowing everything, `noindex` metadata and `X-Robots-Tag` (no public pages exist yet), a per-request nonce Content-Security-Policy in `client/src/middleware.ts` (every page is now rendered per request), `Permissions-Policy`, and the Products/Brands load-error fix: in progress.
 
 Follow-ups recorded during Phase 1 (planned for 1c or Phase 3):
 
-- **Bug:** the Products and Brands pages don't show an error when loading fails (they render an empty table). Found in 1a.
+- ~~**Bug:** the Products and Brands pages don't show an error when loading fails.~~ Fixed in 1c.
 - **Low (security review, PR #4):** the test-database guard checks the database name only, not the host; consider refusing remote hosts unless `CI=true` or an explicit opt-in.
 - **Low (security review, PR #4):** the Playwright failure artifact (7-day retention) contains a throwaway test user's tokens and traces; consider uploading without traces.
 - **Low (security review, PR #4):** GitHub Actions are pinned to version tags, not commit SHAs; pin third-party actions (gitleaks) to SHAs.
