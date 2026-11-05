@@ -80,7 +80,7 @@ The API and worker load the root `.env` automatically (Node's `--env-file-if-exi
 
 ### Running tests
 
-Tests use a separate database, `marketing_platform_test`. **The test suite deletes and rewrites data.** The test setup only renames a database called exactly `marketing_platform` to `marketing_platform_test`; any other database name in `DATABASE_URL` is used as it is. So the URL you test with must point to a dedicated test database, never your development data.
+Tests use a separate database, `marketing_platform_test`. **The test suite deletes and rewrites data.** The test setup renames a database called exactly `marketing_platform` to `marketing_platform_test`, and then **refuses to run unless the database name ends in `_test`** (checked again against the connected database right before tables are wiped). The error names the database only, never the connection string.
 
 On Windows, create a separate Neon branch or database named `marketing_platform_test`, then:
 
@@ -98,7 +98,34 @@ DATABASE_URL=postgresql://marketing_admin:local_dev_password@localhost:5432/mark
 pnpm test
 ```
 
-The API suite (33 end-to-end tests over real HTTP and Postgres) covers auth and token rotation, cross-tenant access, role hierarchy, invitations, signed uploads, bulk import, AI job lifecycle, and credit reserve/settle/release including retry, failure, cancellation and concurrent overdraw attempts.
+What `pnpm test` runs:
+
+- `apps/api`: 35 end-to-end tests over real HTTP and Postgres, plus 5 unit tests for the test-database guard.
+- `apps/web`: 36 Vitest + React Testing Library tests (API client, login, register, products list, `useApi`). No database needed.
+- `packages/ai`: 29 unit tests (mock provider, prompts, job pipeline credits with an in-memory fake). Fails if no tests are found.
+- `packages/validation`: 6 unit tests.
+
+#### End-to-end smoke test (Playwright)
+
+Registers a user, creates a brand and a product, and checks the product is listed, against the **built** API and web app. It refuses to start unless `DATABASE_URL` is set in your shell and names a `*_test` database; it never falls back to `.env`. Redis must be reachable (`REDIS_URL`), and the web app must have been built with `NEXT_PUBLIC_API_URL=http://localhost:4000/api/v1`.
+
+```powershell
+$env:DATABASE_URL = "<Neon direct connection string for marketing_platform_test>"
+pnpm build
+pnpm exec playwright install chromium   # first time only
+pnpm test:e2e
+```
+
+```bash
+export DATABASE_URL=postgresql://marketing_admin:local_dev_password@localhost:5432/marketing_platform_test
+pnpm build
+pnpm exec playwright install chromium   # first time only
+pnpm test:e2e
+```
+
+CI runs all of the above on every pull request; the Playwright report is uploaded when it fails.
+
+The API suite covers auth and token rotation, cross-tenant access, role hierarchy, invitations, signed uploads, bulk import, AI job lifecycle, and credit reserve/settle/release including retry, failure, cancellation and concurrent overdraw attempts.
 
 ## Layout
 
