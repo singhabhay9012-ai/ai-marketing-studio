@@ -18,18 +18,18 @@ COPY --from=build /repo /repo
 USER node
 EXPOSE 4000
 # Run `pnpm db:deploy` as a separate release step before starting new versions.
-CMD ["node", "apps/api/dist/main.js"]
+CMD ["node", "server/api/dist/main.js"]
 
 FROM base AS worker
 ENV NODE_ENV=production
 COPY --from=build /repo /repo
 USER node
-CMD ["node", "apps/worker/dist/main.js"]
+CMD ["node", "server/worker/dist/main.js"]
 
 FROM base AS web
 ENV NODE_ENV=production NEXT_TELEMETRY_DISABLED=1
 COPY --from=build /repo /repo
-WORKDIR /repo/apps/web
+WORKDIR /repo/client
 USER node
 EXPOSE 3000
 CMD ["node_modules/.bin/next", "start", "-p", "3000"]
