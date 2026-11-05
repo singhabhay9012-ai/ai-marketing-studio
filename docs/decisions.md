@@ -21,7 +21,7 @@ Newest last. Each decision stays in force until a later entry replaces it. All a
 
 ## D-003: Git workflow
 
-**Decision:** Claude Code works on feature branches, commits, pushes and opens pull requests. It never merges or deploys. The owner reviews and merges into `main`.
+**Decision:** Claude Code works on feature branches, commits, pushes and opens pull requests. It never merges or deploys. The owner reviews and merges into `main`. (Merging partly replaced by D-014; it still never deploys.)
 
 ## D-004: No Docker on the Windows development laptop
 
@@ -78,3 +78,14 @@ Newest last. Each decision stays in force until a later entry replaces it. All a
 - GitHub branch protection on `main` is the real control. Checked 5 Nov 2026: pull request and up-to-date `checks` job required, force-pushes and deletion blocked, linear history, conversation resolution, enforced for admins, 0 approvals required (so the sole owner can merge).
 - The allowed `pnpm` scripts run whatever `package.json` defines, so script changes in a pull request deserve review. Tests must use a dedicated test database (see README).
 - If "require code owner review" is ever turned on, the sole code owner can't approve their own pull requests; add a second owner first.
+
+## D-014: Claude may merge pull requests on explicit request
+
+**Context:** Approved by the owner on 5 Nov 2026 ("Let Claude merge"), replacing the merge part of D-003.
+
+**Decision:** The main Claude Code session may merge a pull request only when the owner explicitly asks in chat to merge that specific pull request. Before merging it confirms that the PR head is the verified commit, the required `checks` job passed and the merge state is clean, then runs `gh pr merge <number> --squash`. Subagents never merge. Claude still never deploys.
+
+**Consequences:**
+- `.claude/settings.json` moves `gh pr merge` from `deny` to `ask`, so every merge also needs the owner's approval at a permission prompt.
+- Branch protection on `main` is unchanged and is still the real control: no admin override, no bypass.
+- Without an explicit request, the owner reviews and merges as before.
