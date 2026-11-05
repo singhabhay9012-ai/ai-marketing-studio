@@ -32,7 +32,8 @@ test('a new user can register, create a brand and a product', async ({ page }) =
   await expect(page.getByRole('heading', { level: 1, name: 'Products' })).toBeVisible();
   await page.getByRole('button', { name: 'New product' }).click();
   await page.getByLabel('Name', { exact: true }).fill(productName);
-  await page.getByLabel('Brand', { exact: true }).selectOption({ label: brandName });
+  // The <select> sits inside its <label>, so the accessible name is "Brand <selected option>": match the prefix.
+  await page.getByRole('combobox', { name: /^Brand/ }).selectOption({ label: brandName });
   await page.getByRole('button', { name: 'Create product' }).click();
 
   // Creating redirects to the product detail page; go back to the list via navigation.
