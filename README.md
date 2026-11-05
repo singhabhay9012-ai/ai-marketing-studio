@@ -26,14 +26,48 @@ This repository implements the **foundational milestone** from the production bl
 
 ## Quick start
 
-Prerequisites: Node 22, pnpm 10, Docker.
+Prerequisites: Node 22 and pnpm 10. Docker is **optional** and never required: the Windows development laptop can't run it (decision D-004 in `docs/decisions.md`).
+
+Until roadmap phase 2 (the MongoDB port) is merged, the app runs on PostgreSQL with Prisma.
+
+Generate each JWT secret (works in PowerShell and bash):
+
+```bash
+node -e "console.log(require('crypto').randomBytes(48).toString('base64'))"
+```
+
+### Windows (PowerShell, no Docker)
+
+Uses hosted services: PostgreSQL on Neon (project `ai-marketing-studio`) and Redis on Upstash.
+
+```powershell
+pnpm install
+Copy-Item .env.example .env
+# Edit .env: DATABASE_URL = Neon direct (non-pooled) connection string with sslmode=require
+# (Prisma migrations can fail through the pooler), REDIS_URL = Upstash rediss:// URL,
+# STORAGE_DRIVER=local, and the JWT secrets.
+Copy-Item .env packages/database/.env   # Prisma CLI reads DATABASE_URL from here
+pnpm db:deploy                          # stop here if migrations fail
+pnpm db:seed                            # dev only, never production. Demo login: demo@example.com / Password123!
+pnpm build
+pnpm dev                                # web :3000 · api :4000 · worker
+```
+
+### macOS (bash)
+
+Use local Postgres and Redis (Homebrew), the same Neon/Upstash setup as Windows, or Docker. The `DATABASE_URL` in `.env.example` matches the Docker setup. With Homebrew Postgres, either create the same role and database or edit `DATABASE_URL` to match yours:
+
+```bash
+createuser -h localhost --createdb -P marketing_admin    # prompts for the password you put in DATABASE_URL
+createdb -h localhost -U marketing_admin marketing_platform
+```
 
 ```bash
 pnpm install
-cp .env.example .env              # then set JWT secrets: openssl rand -base64 48
-pnpm services:up                  # Postgres 16, Redis 7, MinIO
+cp .env.example .env              # then set DATABASE_URL, REDIS_URL and the JWT secrets
+pnpm services:up                  # optional, Docker only: Postgres 16, Redis 7, MinIO
 cp .env packages/database/.env    # Prisma CLI reads DATABASE_URL from here
-pnpm db:deploy && pnpm db:seed    # demo login: demo@example.com / Password123!
+pnpm db:deploy && pnpm db:seed    # seed is dev only, never production. Demo login: demo@example.com / Password123!
 pnpm build
 pnpm dev                          # web :3000 · api :4000 · worker
 ```
@@ -46,7 +80,17 @@ The API and worker load the root `.env` automatically (Node's `--env-file-if-exi
 
 ### Running tests
 
-Tests use a separate database, `marketing_platform_test`:
+Tests use a separate database, `marketing_platform_test`. **The test suite deletes and rewrites data.** The test setup only renames a database called exactly `marketing_platform` to `marketing_platform_test`; any other database name in `DATABASE_URL` is used as it is. So the URL you test with must point to a dedicated test database, never your development data.
+
+On Windows, create a separate Neon branch or database named `marketing_platform_test`, then:
+
+```powershell
+$env:DATABASE_URL = "<Neon direct connection string for marketing_platform_test>"
+pnpm db:deploy    # stop here if migrations fail
+pnpm test
+```
+
+With a local Postgres (macOS):
 
 ```bash
 createdb -h localhost -U marketing_admin marketing_platform_test

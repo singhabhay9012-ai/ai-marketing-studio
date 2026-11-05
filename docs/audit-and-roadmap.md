@@ -332,6 +332,8 @@ Each phase is a separate branch and pull request. **Exit criteria** must pass be
 
 **Exit:** CI green with real lint, blocking audit and secret scan; all tests pass; repo on GitHub.
 
+**Status: ✅ Done** (PR #1, merged 5 Nov 2026). `main` is protected (pull request and passing `checks` job required). Verified 5 Nov 2026: CI green on `main`, `pnpm audit --prod --audit-level moderate` reports no known vulnerabilities, Swagger gated by `isSwaggerEnabled()`.
+
 ### Phase 1: Restructure and frontend hardening (Next.js stays)
 - Create `client/`, `server/`, `shared/`. Move code without changing behaviour (`apps/web` → `client/`; `apps/api` + `apps/worker` → `server/`).
 - Add `robots.ts` and `noindex` metadata for app routes; Content-Security-Policy in `next.config.mjs`.
@@ -386,11 +388,16 @@ Complete AI Marketing Intelligence (brand analysis, personas, content pillars), 
 
 ## 7. Immediate risks to address regardless of order
 
-1. 🔴 **5 high-severity dependency vulnerabilities**, with a CI audit step that can't fail (Phase 0).
-2. 🔴 **Emails aren't sent:** verification, password reset and invitations don't work for real users (Phase 3; earlier if anyone outside the team will log in).
-3. 🔴 **API documentation exposed in production** (Phase 0).
-4. 🟡 **Linting is a no-op:** code-quality issues aren't caught (Phase 0).
-5. 🟡 **No Git remote:** the code exists only in this temporary workspace until it's pushed (Phase 0).
+Open:
+
+1. 🔴 **Emails aren't sent:** verification, password reset and invitations don't work for real users (Phase 3; earlier if anyone outside the team will log in).
+
+Resolved in Phase 0 (PR #1):
+
+- ✅ Dependency vulnerabilities fixed; the CI audit step now blocks.
+- ✅ API documentation served only outside production.
+- ✅ ESLint now lints for real.
+- ✅ Code pushed to GitHub (`singhabhay9012-ai/ai-marketing-studio`).
 
 ---
 

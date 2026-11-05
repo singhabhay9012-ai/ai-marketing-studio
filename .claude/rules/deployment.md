@@ -22,7 +22,7 @@ Use GitHub Actions or the repository's existing CI system for appropriate type c
 Keep development, preview/staging and production settings and databases separate. Document required environment variables in `.env.example` using placeholder values only. Validate required variables at startup. Never expose server secrets to the browser.
 
 ## Deployment verification
-After deployment, verify the deployment result, URL, commit/revision, frontend availability, backend health, database connectivity and critical API flows. Report what was actually checked. Never claim deployment succeeded without confirmation.
+After a deployment the owner has authorised, verify the deployment result, URL, commit/revision, frontend availability, backend health, database connectivity and critical API flows. Report what was actually checked. Never claim deployment succeeded without confirmation.
 
 ## Production protection
 Destructive migrations, production data deletion, breaking API/auth changes, security-sensitive changes, domain changes and infrastructure changes require explicit approval and a recovery/rollback plan. Do not automatically bypass approvals or CI gates.
