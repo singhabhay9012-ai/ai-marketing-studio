@@ -37,7 +37,7 @@ Browser (Next.js) ──HTTPS──▶ NestJS API ── ThrottlerGuard → JwtA
 
 `POST /ai/product-analysis` → job QUEUED + credits held → worker runs `processAiJob` → output validated with Zod → COMPLETED + settled. The user reviews it in the UI and confirms via `POST /ai/product-analysis/:jobId/confirm`. Content generation is refused until a confirmed analysis exists. Retryable provider errors (429/5xx/timeouts/invalid JSON) back off up to 3 attempts while credits stay held. A final failure marks the job FAILED and releases the credits.
 
-To use OpenAI, set `AI_PROVIDER=openai` and `OPENAI_API_KEY`. Vision input needs `STORAGE_DRIVER=s3`, because providers can't reach local files. Prompts live in `packages/ai/src/prompts.ts`; bump `version` on every change.
+To use OpenAI, set `AI_PROVIDER=openai` and `OPENAI_API_KEY`. Vision input needs `STORAGE_DRIVER=s3`, because providers can't reach local files. Prompts live in `server/ai/src/prompts.ts`; bump `version` on every change.
 
 ## Known gaps and next steps (in roadmap order)
 
@@ -47,7 +47,7 @@ To use OpenAI, set `AI_PROVIDER=openai` and `OPENAI_API_KEY`. Vision input needs
 4. **Sprint 6 — Marketing kits:** an `exports` queue processor that builds ZIPs (add a ZIP library such as `archiver` then; it was removed in phase 0 because it was unused and v7 pulled in vulnerable `glob`/`minimatch`, and v8 is ESM-only) and returns signed URLs that expire.
 5. **Sprint 7 — Bulk & billing:** move large imports to the `bulk-import` queue, add image URL mapping, a `PaymentProvider` interface with Razorpay checkout, verified webhooks (`WebhookEvent` table already exists) and monthly credit grants.
 6. **Hardening:** PostgreSQL RLS as defence in depth, a real email provider, upload malware scanning, Sentry/OTel, backups with a tested restore, and a load test.
-7. **Platform specs:** every `verifiedAt` in `packages/validation/src/platform-specs.ts` is `null`. Verify against current platform documentation before launch.
+7. **Platform specs:** every `verifiedAt` in `shared/validation/src/platform-specs.ts` is `null`. Verify against current platform documentation before launch.
 
 ## Gotchas
 

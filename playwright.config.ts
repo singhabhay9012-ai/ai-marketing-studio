@@ -5,8 +5,8 @@ import { defineConfig, devices } from '@playwright/test';
  * (run `pnpm build` first). The real run happens in CI.
  *
  * DATABASE SAFETY: the e2e test registers real users, so it must only ever hit a
- * dedicated test database. This mirrors apps/api/test/db-guard.ts (kept as a small
- * copy so this file survives moving apps/ in the next restructure). Errors name the
+ * dedicated test database. This mirrors server/api/test/db-guard.ts (kept as a small
+ * copy so this file stays independent of the server workspace layout). Errors name the
  * database only, never the connection string, which can contain a password.
  * Node's --env-file never overrides variables already set, so the DATABASE_URL
  * validated here is passed to the API explicitly and wins over any local .env.

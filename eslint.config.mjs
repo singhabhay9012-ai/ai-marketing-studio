@@ -29,8 +29,8 @@ export default tseslint.config(
       parserOptions: {
         // seed.ts is run with tsx and sits outside the database package's tsconfig. playwright.config.ts sits at the root, which has no tsconfig.json.
         projectService: {
-          allowDefaultProject: ['*.mjs', '*.js', 'packages/database/prisma/seed.ts', 'playwright.config.ts'],
-          defaultProject: 'packages/database/tsconfig.json',
+          allowDefaultProject: ['*.mjs', '*.js', 'server/database/prisma/seed.ts', 'playwright.config.ts'],
+          defaultProject: 'server/database/tsconfig.json',
         },
         tsconfigRootDir: import.meta.dirname,
       },
@@ -51,10 +51,10 @@ export default tseslint.config(
 
   // Next.js frontend.
   {
-    files: ['apps/web/**/*.{ts,tsx}'],
+    files: ['client/**/*.{ts,tsx}'],
     plugins: { '@next/next': nextPlugin, 'react-hooks': reactHooks },
     languageOptions: { globals: { ...globals.browser } },
-    settings: { next: { rootDir: 'apps/web' } },
+    settings: { next: { rootDir: 'client' } },
     rules: {
       ...nextPlugin.configs.recommended.rules,
       ...nextPlugin.configs['core-web-vitals'].rules,

@@ -121,7 +121,7 @@ These apply in addition to the sections above and to `.claude/rules/`. Where the
 2. Port the database to MongoDB with `@nestjs/mongoose` (acceptance criteria in 12.6).
 3. Security, AI and quality hardening. 4. Workspaces, 8 roles, super-admin. 5. Blueprint features. 6. Deployment.
 
-Until phase 1 is merged the layout is still `apps/web`, `apps/api`, `apps/worker`, `packages/*`. Until phase 2 is merged the app runs on PostgreSQL/Prisma; don't add new Prisma code beyond what a phase needs.
+Layout (since phase 1b): `client/` (Next.js), `server/api`, `server/worker`, `server/database`, `server/ai`, and `shared/validation`, `shared/types`, `shared/config`. Package names (`@amp/*`) are unchanged. Until phase 2 is merged the app runs on PostgreSQL/Prisma; don't add new Prisma code beyond what a phase needs.
 
 ### 12.3 Environments
 - The owner works on **Windows and macOS**. The Windows laptop has **no Docker** (its hypervisor breaks Windows boot; decision D-004). Every dev and test workflow must run without Docker. Give PowerShell and bash commands when they differ.

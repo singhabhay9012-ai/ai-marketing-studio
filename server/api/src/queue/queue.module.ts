@@ -4,7 +4,7 @@ import IORedis from 'ioredis';
 import { QUEUES, type AiJobPayload, type QueueName } from '@amp/shared-types';
 import { env } from '../config/env';
 
-/** Producer side of BullMQ. Consumers live in apps/worker. */
+/** Producer side of BullMQ. Consumers live in server/worker. */
 @Injectable()
 export class QueueService implements OnModuleDestroy {
   private readonly logger = new Logger('Queue');

@@ -341,7 +341,19 @@ Each phase is a separate branch and pull request. **Exit criteria** must pass be
 
 **Exit:** all existing tests pass; client builds; Playwright smoke passes against a local API.
 
-Delivered in three pull requests: **1a** test safety net (test-database guard, `packages/ai` unit tests, Vitest for the web app, Playwright smoke in CI), **1b** the move to `client/` + `server/` + `shared/`, **1c** `robots`, `noindex` and CSP. Known bug found in 1a, to fix in 1c or Phase 3: the Products and Brands pages don't show an error when loading fails (they render an empty table).
+Delivered in three pull requests:
+
+- **1a** test safety net (test-database guard, AI package unit tests, Vitest for the web app, Playwright smoke in CI): **✅ done** (PR #4, merged 5 Nov 2026).
+- **1b** the move to `client/` + `server/` (`api`, `worker`, `database`, `ai`) + `shared/` (`validation`, `types`, `config`), package names unchanged: in progress.
+- **1c** `robots`, `noindex` and CSP.
+
+Follow-ups recorded during Phase 1 (planned for 1c or Phase 3):
+
+- **Bug:** the Products and Brands pages don't show an error when loading fails (they render an empty table). Found in 1a.
+- **Low (security review, PR #4):** the test-database guard checks the database name only, not the host; consider refusing remote hosts unless `CI=true` or an explicit opt-in.
+- **Low (security review, PR #4):** the Playwright failure artifact (7-day retention) contains a throwaway test user's tokens and traces; consider uploading without traces.
+- **Low (security review, PR #4):** GitHub Actions are pinned to version tags, not commit SHAs; pin third-party actions (gitleaks) to SHAs.
+- **Medium (security review, Phase 1b; existed before):** there is no `.dockerignore`, and the Dockerfile runs `COPY . .`, so a local build would bake the root `.env` into image layers. Add a `.dockerignore` (`.env`, `.env.*` except `.env.example`, `node_modules`, `.git`, `.storage`, Playwright output) before any local image build, and by Phase 6 at the latest.
 
 ### Phase 2: Database port to MongoDB + Mongoose (in NestJS)
 - Add `@nestjs/mongoose`; design collections from the 31 Prisma models (references vs embedding, indexes starting with `organizationId`, unique indexes, integer paise for money).
