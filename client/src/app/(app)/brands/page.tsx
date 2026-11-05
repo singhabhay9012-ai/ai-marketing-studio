@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { brandSchema } from '@amp/validation';
-import { Alert, Empty, Field, PageHeader, Spinner } from '@/components/ui';
+import { Alert, Empty, Field, LoadError, PageHeader, Spinner } from '@/components/ui';
 import { api, errorText } from '@/lib/api';
 import { useCan } from '@/lib/auth';
 import { useApi } from '@/lib/use-api';
@@ -18,7 +18,7 @@ interface Brand {
 }
 
 export default function BrandsPage() {
-  const { data, loading, reload } = useApi<Brand[]>('/brands');
+  const { data, error, loading, reload } = useApi<Brand[]>('/brands');
   const canEdit = useCan('MANAGER');
   const [editing, setEditing] = useState<Brand | 'new' | null>(null);
 
@@ -32,6 +32,8 @@ export default function BrandsPage() {
       {editing && <BrandForm brand={editing === 'new' ? null : editing} onDone={() => { setEditing(null); void reload(); }} />}
       {loading ? (
         <Spinner />
+      ) : error ? (
+        <LoadError message={error} onRetry={() => void reload()} />
       ) : data?.length === 0 ? (
         <Empty title="No brands yet">Products belong to a brand. Create one to begin.</Empty>
       ) : (

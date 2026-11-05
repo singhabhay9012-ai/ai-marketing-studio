@@ -38,6 +38,18 @@ export function Alert({ kind = 'error', children }: { kind?: 'error' | 'ok' | 'w
   );
 }
 
+/** Shown when a list or page fails to load, with a way to try again. */
+export function LoadError({ message, onRetry }: { message: string; onRetry: () => void }) {
+  return (
+    <Alert>
+      <span>Couldn&apos;t load this page: {message}</span>{' '}
+      <button type="button" className="underline" onClick={onRetry}>
+        Try again
+      </button>
+    </Alert>
+  );
+}
+
 const STATUS_TONE: Record<string, string> = {
   ACTIVE: 'bg-ok/10 text-ok',
   COMPLETED: 'bg-ok/10 text-ok',

@@ -82,4 +82,16 @@ describe('ProductsPage', () => {
     expect(screen.getByText(/Create a brand first/)).toBeInTheDocument();
     expect(screen.getByRole('link', { name: 'Go to brands' })).toHaveAttribute('href', '/brands');
   });
+
+  it('shows an error with a retry instead of an empty table when loading fails', async () => {
+    const reload = vi.fn(() => Promise.resolve());
+    results['/products'] = res(null, { error: 'Network error', reload });
+    render(<ProductsPage />);
+    expect(screen.getByRole('alert')).toHaveTextContent(/Couldn.t load this page: Network error/);
+    expect(screen.queryByRole('table')).not.toBeInTheDocument();
+    expect(screen.queryByText('No products yet')).not.toBeInTheDocument();
+    expect(screen.queryByText(/undefined products/)).not.toBeInTheDocument();
+    await userEvent.setup().click(screen.getByRole('button', { name: 'Try again' }));
+    expect(reload).toHaveBeenCalledTimes(1);
+  });
 });
