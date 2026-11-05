@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
-import { Alert, Badge, Empty, Field, PageHeader, Spinner } from '@/components/ui';
+import { Alert, Badge, Empty, Field, LoadError, PageHeader, Spinner } from '@/components/ui';
 import { api, errorText } from '@/lib/api';
 import { useCan } from '@/lib/auth';
 import { useApi } from '@/lib/use-api';
@@ -60,8 +60,11 @@ export default function ProductsPage() {
         <button className="btn-ghost">Search</button>
       </form>
 
+      {products.error && products.data && <div className="mb-4"><LoadError message={products.error} onRetry={() => void products.reload()} /></div>}
       {products.loading ? (
         <Spinner />
+      ) : products.error && !products.data ? (
+        <LoadError message={products.error} onRetry={() => void products.reload()} />
       ) : products.data?.items.length === 0 ? (
         <Empty title={query ? 'No matches' : 'No products yet'}>{!query && 'Add a product or import a CSV.'}</Empty>
       ) : (
